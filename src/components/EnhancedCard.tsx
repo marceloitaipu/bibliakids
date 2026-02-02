@@ -3,28 +3,36 @@ import { View, ViewStyle } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { theme } from '../theme';
 
-export default function Card({ 
+export default function EnhancedCard({ 
   children, 
   style,
-  gradient = true,
+  gradient = false,
+  glowColor,
 }: { 
   children: React.ReactNode; 
   style?: ViewStyle;
   gradient?: boolean;
+  glowColor?: string;
 }) {
+  const shadowColor = glowColor || theme.colors.shadow;
+
   if (gradient) {
     return (
       <LinearGradient
-        colors={theme.gradients.card}
+        colors={['#FFFFFF', '#FFF9F0']}
         start={{ x: 0, y: 0 }}
         end={{ x: 0, y: 1 }}
         style={[
           {
-            borderRadius: theme.radius.xl,
-            padding: theme.spacing(2),
+            borderRadius: 24,
+            padding: 16,
             borderWidth: 2,
             borderColor: theme.colors.stroke,
-            ...theme.shadows.medium,
+            shadowColor: shadowColor,
+            shadowOpacity: 0.15,
+            shadowRadius: 16,
+            shadowOffset: { width: 0, height: 8 },
+            elevation: 8,
           },
           style,
         ]}
@@ -39,11 +47,15 @@ export default function Card({
       style={[
         {
           backgroundColor: theme.colors.card,
-          borderRadius: theme.radius.xl,
-          padding: theme.spacing(2),
+          borderRadius: 24,
+          padding: 16,
           borderWidth: 2,
           borderColor: theme.colors.stroke,
-          ...theme.shadows.medium,
+          shadowColor: shadowColor,
+          shadowOpacity: 0.12,
+          shadowRadius: 12,
+          shadowOffset: { width: 0, height: 6 },
+          elevation: 6,
         },
         style,
       ]}
