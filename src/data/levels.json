@@ -1,0 +1,1254 @@
+{
+  "levels": [
+    {
+      "id": "criacao",
+      "title": "A Criação",
+      "short": "Deus criou o mundo com amor",
+      "stickerId": "sticker_sun",
+      "story": {
+        "line1": "Deus criou o mundo com carinho e sabedoria.",
+        "line2": "Tudo ficou bonito e cheio de vida!"
+      },
+      "questions": [
+        {
+          "prompt": "Quem criou o mundo?",
+          "options": [
+            "Deus",
+            "Um rei",
+            "Um gigante"
+          ],
+          "answerIndex": 0,
+          "explain": "Deus criou tudo com amor.",
+          "ref": "Gênesis 1"
+        },
+        {
+          "prompt": "O que Deus criou primeiro?",
+          "options": [
+            "A luz",
+            "Um castelo",
+            "Um carro"
+          ],
+          "answerIndex": 0,
+          "explain": "Deus disse: 'Haja luz!'",
+          "ref": "Gênesis 1"
+        },
+        {
+          "prompt": "Deus criou o céu e a terra. Isso é...",
+          "options": [
+            "Verdade",
+            "Brincadeira",
+            "Segredo"
+          ],
+          "answerIndex": 0,
+          "explain": "A Bíblia conta que Deus criou o céu e a terra.",
+          "ref": "Gênesis 1"
+        },
+        {
+          "prompt": "Deus viu que tudo era...",
+          "options": [
+            "Bom",
+            "Feio",
+            "Impossível"
+          ],
+          "answerIndex": 0,
+          "explain": "Deus fez tudo muito bom.",
+          "ref": "Gênesis 1"
+        },
+        {
+          "prompt": "Quem criou os animais?",
+          "options": [
+            "Deus",
+            "Noé",
+            "Davi"
+          ],
+          "answerIndex": 0,
+          "explain": "Deus criou os animais e cuidou deles.",
+          "ref": "Gênesis 1"
+        },
+        {
+          "prompt": "Quem criou as plantas e árvores?",
+          "options": [
+            "Deus",
+            "Jonas",
+            "Um soldado"
+          ],
+          "answerIndex": 0,
+          "explain": "Deus criou as plantas para enfeitar o mundo.",
+          "ref": "Gênesis 1"
+        },
+        {
+          "prompt": "O que devemos fazer com a criação de Deus?",
+          "options": [
+            "Cuidar",
+            "Quebrar",
+            "Jogar fora"
+          ],
+          "answerIndex": 0,
+          "explain": "Cuidar do mundo é uma forma de agradecer.",
+          "ref": "Gênesis 2"
+        },
+        {
+          "prompt": "Quem ama todas as pessoas?",
+          "options": [
+            "Deus",
+            "Um rei",
+            "Um gigante"
+          ],
+          "answerIndex": 0,
+          "explain": "A Bíblia ensina que Deus ama, cuida e nos ensina a fazer o bem.",
+          "ref": "Bíblia"
+        },
+        {
+          "prompt": "Quem devemos obedecer?",
+          "options": [
+            "Deus",
+            "Qualquer pessoa",
+            "Ninguém"
+          ],
+          "answerIndex": 0,
+          "explain": "A Bíblia ensina que Deus ama, cuida e nos ensina a fazer o bem.",
+          "ref": "Bíblia"
+        },
+        {
+          "prompt": "A Bíblia ensina a fazer o quê?",
+          "options": [
+            "O bem",
+            "O mal",
+            "Nada"
+          ],
+          "answerIndex": 0,
+          "explain": "A Bíblia ensina que Deus ama, cuida e nos ensina a fazer o bem.",
+          "ref": "Bíblia"
+        },
+        {
+          "prompt": "Quando erramos, Deus nos dá...",
+          "options": [
+            "Uma nova chance",
+            "Só castigo",
+            "Medo"
+          ],
+          "answerIndex": 0,
+          "explain": "A Bíblia ensina que Deus ama, cuida e nos ensina a fazer o bem.",
+          "ref": "Bíblia"
+        },
+        {
+          "prompt": "Deus cuida das crianças?",
+          "options": [
+            "Sim",
+            "Não",
+            "Só às vezes"
+          ],
+          "answerIndex": 0,
+          "explain": "A Bíblia ensina que Deus ama, cuida e nos ensina a fazer o bem.",
+          "ref": "Bíblia"
+        },
+        {
+          "prompt": "Devemos agradecer a Deus?",
+          "options": [
+            "Sim",
+            "Não",
+            "Nunca"
+          ],
+          "answerIndex": 0,
+          "explain": "A Bíblia ensina que Deus ama, cuida e nos ensina a fazer o bem.",
+          "ref": "Bíblia"
+        },
+        {
+          "prompt": "Deus fica feliz quando somos...",
+          "options": [
+            "Bondosos",
+            "Briguentos",
+            "Egoístas"
+          ],
+          "answerIndex": 0,
+          "explain": "A Bíblia ensina que Deus ama, cuida e nos ensina a fazer o bem.",
+          "ref": "Bíblia"
+        }
+      ],
+      "minigame": {
+        "type": "creation_place"
+      }
+    },
+    {
+      "id": "noe",
+      "title": "A Arca de Noé",
+      "short": "Uma arca, muitos animais!",
+      "stickerId": "sticker_ark",
+      "story": {
+        "line1": "Noé confiou em Deus e construiu uma grande arca.",
+        "line2": "Assim, sua família e os animais ficaram seguros."
+      },
+      "questions": [
+        {
+          "prompt": "Quem construiu a arca?",
+          "options": [
+            "Moisés",
+            "Noé",
+            "Daniel"
+          ],
+          "answerIndex": 1,
+          "explain": "Noé construiu a arca obedecendo a Deus.",
+          "ref": "Gênesis 6"
+        },
+        {
+          "prompt": "O que entrou na arca com Noé?",
+          "options": [
+            "Só peixes",
+            "Animais e família",
+            "Dinossauros em bicicletas"
+          ],
+          "answerIndex": 1,
+          "explain": "A Bíblia diz que animais e a família de Noé entraram na arca.",
+          "ref": "Gênesis 7"
+        },
+        {
+          "prompt": "Por que Noé construiu a arca?",
+          "options": [
+            "Para viajar",
+            "Porque Deus pediu",
+            "Para guardar brinquedos"
+          ],
+          "answerIndex": 1,
+          "explain": "Noé obedeceu ao pedido de Deus.",
+          "ref": "Gênesis 6"
+        },
+        {
+          "prompt": "Depois da chuva, o que apareceu no céu?",
+          "options": [
+            "Um arco-íris",
+            "Um foguete",
+            "Um balão"
+          ],
+          "answerIndex": 0,
+          "explain": "O arco-íris foi um sinal de Deus.",
+          "ref": "Gênesis 9"
+        },
+        {
+          "prompt": "Noé era conhecido por...",
+          "options": [
+            "Desobedecer",
+            "Confiar em Deus",
+            "Ser rei"
+          ],
+          "answerIndex": 1,
+          "explain": "Noé confiou em Deus mesmo quando foi difícil.",
+          "ref": "Gênesis 6"
+        },
+        {
+          "prompt": "Quantas opções Deus deu a Noé?",
+          "options": [
+            "Nenhuma",
+            "Muitas",
+            "Uma missão para obedecer"
+          ],
+          "answerIndex": 2,
+          "explain": "Deus deu a missão e Noé obedeceu.",
+          "ref": "Gênesis 6"
+        },
+        {
+          "prompt": "O que aprendemos com Noé?",
+          "options": [
+            "Obedecer e confiar",
+            "Mentir para ganhar",
+            "Brigar sempre"
+          ],
+          "answerIndex": 0,
+          "explain": "Confiar em Deus é o melhor caminho.",
+          "ref": "Gênesis 6"
+        },
+        {
+          "prompt": "Quem ama todas as pessoas?",
+          "options": [
+            "Deus",
+            "Um rei",
+            "Um gigante"
+          ],
+          "answerIndex": 0,
+          "explain": "A Bíblia ensina que Deus ama, cuida e nos ensina a fazer o bem.",
+          "ref": "Bíblia"
+        },
+        {
+          "prompt": "Quem devemos obedecer?",
+          "options": [
+            "Deus",
+            "Qualquer pessoa",
+            "Ninguém"
+          ],
+          "answerIndex": 0,
+          "explain": "A Bíblia ensina que Deus ama, cuida e nos ensina a fazer o bem.",
+          "ref": "Bíblia"
+        },
+        {
+          "prompt": "A Bíblia ensina a fazer o quê?",
+          "options": [
+            "O bem",
+            "O mal",
+            "Nada"
+          ],
+          "answerIndex": 0,
+          "explain": "A Bíblia ensina que Deus ama, cuida e nos ensina a fazer o bem.",
+          "ref": "Bíblia"
+        },
+        {
+          "prompt": "Quando erramos, Deus nos dá...",
+          "options": [
+            "Uma nova chance",
+            "Só castigo",
+            "Medo"
+          ],
+          "answerIndex": 0,
+          "explain": "A Bíblia ensina que Deus ama, cuida e nos ensina a fazer o bem.",
+          "ref": "Bíblia"
+        },
+        {
+          "prompt": "Deus cuida das crianças?",
+          "options": [
+            "Sim",
+            "Não",
+            "Só às vezes"
+          ],
+          "answerIndex": 0,
+          "explain": "A Bíblia ensina que Deus ama, cuida e nos ensina a fazer o bem.",
+          "ref": "Bíblia"
+        },
+        {
+          "prompt": "Devemos agradecer a Deus?",
+          "options": [
+            "Sim",
+            "Não",
+            "Nunca"
+          ],
+          "answerIndex": 0,
+          "explain": "A Bíblia ensina que Deus ama, cuida e nos ensina a fazer o bem.",
+          "ref": "Bíblia"
+        },
+        {
+          "prompt": "Deus fica feliz quando somos...",
+          "options": [
+            "Bondosos",
+            "Briguentos",
+            "Egoístas"
+          ],
+          "answerIndex": 0,
+          "explain": "A Bíblia ensina que Deus ama, cuida e nos ensina a fazer o bem.",
+          "ref": "Bíblia"
+        }
+      ],
+      "minigame": {
+        "type": "noe_pairs",
+        "pairsToMatch": 3
+      }
+    },
+    {
+      "id": "davi",
+      "title": "Davi e Golias",
+      "short": "Coragem com Deus",
+      "stickerId": "sticker_sling",
+      "story": {
+        "line1": "Davi era pequeno, mas tinha um coração corajoso.",
+        "line2": "Ele confiou em Deus para enfrentar Golias."
+      },
+      "questions": [
+        {
+          "prompt": "Quem enfrentou Golias?",
+          "options": [
+            "Davi",
+            "Noé",
+            "Jonas"
+          ],
+          "answerIndex": 0,
+          "explain": "Davi enfrentou Golias com coragem.",
+          "ref": "1 Samuel 17"
+        },
+        {
+          "prompt": "Davi usou o quê para acertar Golias?",
+          "options": [
+            "Uma pedra e estilingue",
+            "Uma espada gigante",
+            "Um raio"
+          ],
+          "answerIndex": 0,
+          "explain": "Davi usou uma pedra e um estilingue.",
+          "ref": "1 Samuel 17"
+        },
+        {
+          "prompt": "Golias era...",
+          "options": [
+            "Bem pequeno",
+            "Um gigante",
+            "Um rei"
+          ],
+          "answerIndex": 1,
+          "explain": "Golias era um gigante.",
+          "ref": "1 Samuel 17"
+        },
+        {
+          "prompt": "Antes da luta, Davi confiou em...",
+          "options": [
+            "Sua força apenas",
+            "Deus",
+            "Sua coroa"
+          ],
+          "answerIndex": 1,
+          "explain": "Davi confiou em Deus.",
+          "ref": "1 Samuel 17"
+        },
+        {
+          "prompt": "Davi era...",
+          "options": [
+            "Um pastor",
+            "Um astronauta",
+            "Um cozinheiro do palácio"
+          ],
+          "answerIndex": 0,
+          "explain": "Davi cuidava de ovelhas.",
+          "ref": "1 Samuel 16"
+        },
+        {
+          "prompt": "O que Deus olha nas pessoas?",
+          "options": [
+            "Só altura",
+            "O coração",
+            "Só roupa"
+          ],
+          "answerIndex": 1,
+          "explain": "Deus vê o coração.",
+          "ref": "1 Samuel 16"
+        },
+        {
+          "prompt": "O que aprendemos com Davi?",
+          "options": [
+            "Ser corajoso com Deus",
+            "Desistir sempre",
+            "Zombar dos outros"
+          ],
+          "answerIndex": 0,
+          "explain": "Com Deus, podemos ser corajosos.",
+          "ref": "1 Samuel 17"
+        },
+        {
+          "prompt": "Quem ama todas as pessoas?",
+          "options": [
+            "Deus",
+            "Um rei",
+            "Um gigante"
+          ],
+          "answerIndex": 0,
+          "explain": "A Bíblia ensina que Deus ama, cuida e nos ensina a fazer o bem.",
+          "ref": "Bíblia"
+        },
+        {
+          "prompt": "Quem devemos obedecer?",
+          "options": [
+            "Deus",
+            "Qualquer pessoa",
+            "Ninguém"
+          ],
+          "answerIndex": 0,
+          "explain": "A Bíblia ensina que Deus ama, cuida e nos ensina a fazer o bem.",
+          "ref": "Bíblia"
+        },
+        {
+          "prompt": "A Bíblia ensina a fazer o quê?",
+          "options": [
+            "O bem",
+            "O mal",
+            "Nada"
+          ],
+          "answerIndex": 0,
+          "explain": "A Bíblia ensina que Deus ama, cuida e nos ensina a fazer o bem.",
+          "ref": "Bíblia"
+        },
+        {
+          "prompt": "Quando erramos, Deus nos dá...",
+          "options": [
+            "Uma nova chance",
+            "Só castigo",
+            "Medo"
+          ],
+          "answerIndex": 0,
+          "explain": "A Bíblia ensina que Deus ama, cuida e nos ensina a fazer o bem.",
+          "ref": "Bíblia"
+        },
+        {
+          "prompt": "Deus cuida das crianças?",
+          "options": [
+            "Sim",
+            "Não",
+            "Só às vezes"
+          ],
+          "answerIndex": 0,
+          "explain": "A Bíblia ensina que Deus ama, cuida e nos ensina a fazer o bem.",
+          "ref": "Bíblia"
+        },
+        {
+          "prompt": "Devemos agradecer a Deus?",
+          "options": [
+            "Sim",
+            "Não",
+            "Nunca"
+          ],
+          "answerIndex": 0,
+          "explain": "A Bíblia ensina que Deus ama, cuida e nos ensina a fazer o bem.",
+          "ref": "Bíblia"
+        },
+        {
+          "prompt": "Deus fica feliz quando somos...",
+          "options": [
+            "Bondosos",
+            "Briguentos",
+            "Egoístas"
+          ],
+          "answerIndex": 0,
+          "explain": "A Bíblia ensina que Deus ama, cuida e nos ensina a fazer o bem.",
+          "ref": "Bíblia"
+        }
+      ],
+      "minigame": {
+        "type": "david_stone"
+      }
+    },
+    {
+      "id": "daniel",
+      "title": "Daniel na Cova dos Leões",
+      "short": "Deus protege Daniel",
+      "stickerId": "sticker_lion",
+      "story": {
+        "line1": "Daniel orava a Deus todos os dias.",
+        "line2": "Mesmo na cova dos leões, Deus cuidou dele."
+      },
+      "questions": [
+        {
+          "prompt": "Daniel orava para...",
+          "options": [
+            "Deus",
+            "Um leão",
+            "Uma estátua"
+          ],
+          "answerIndex": 0,
+          "explain": "Daniel conversava com Deus em oração.",
+          "ref": "Daniel 6"
+        },
+        {
+          "prompt": "Onde Daniel foi colocado?",
+          "options": [
+            "No navio",
+            "Na cova dos leões",
+            "No topo da montanha"
+          ],
+          "answerIndex": 1,
+          "explain": "Daniel foi colocado na cova dos leões.",
+          "ref": "Daniel 6"
+        },
+        {
+          "prompt": "Deus fez o quê com os leões?",
+          "options": [
+            "Deixou calmos",
+            "Deixou com asas",
+            "Deixou falar"
+          ],
+          "answerIndex": 0,
+          "explain": "Deus protegeu Daniel e os leões não o machucaram.",
+          "ref": "Daniel 6"
+        },
+        {
+          "prompt": "Daniel era conhecido por ser...",
+          "options": [
+            "Fiel",
+            "Malvado",
+            "Preguiçoso"
+          ],
+          "answerIndex": 0,
+          "explain": "Daniel foi fiel a Deus.",
+          "ref": "Daniel 6"
+        },
+        {
+          "prompt": "Quem cuidou de Daniel na cova?",
+          "options": [
+            "Deus",
+            "Golias",
+            "Noé"
+          ],
+          "answerIndex": 0,
+          "explain": "Deus cuidou de Daniel.",
+          "ref": "Daniel 6"
+        },
+        {
+          "prompt": "O rei ficou...",
+          "options": [
+            "Triste e preocupado",
+            "Rindo muito",
+            "Dormindo"
+          ],
+          "answerIndex": 0,
+          "explain": "O rei ficou preocupado com Daniel.",
+          "ref": "Daniel 6"
+        },
+        {
+          "prompt": "O que aprendemos com Daniel?",
+          "options": [
+            "Orar e confiar",
+            "Esconder a fé",
+            "Mentir para escapar"
+          ],
+          "answerIndex": 0,
+          "explain": "Confiar em Deus ajuda em momentos difíceis.",
+          "ref": "Daniel 6"
+        },
+        {
+          "prompt": "Quem ama todas as pessoas?",
+          "options": [
+            "Deus",
+            "Um rei",
+            "Um gigante"
+          ],
+          "answerIndex": 0,
+          "explain": "A Bíblia ensina que Deus ama, cuida e nos ensina a fazer o bem.",
+          "ref": "Bíblia"
+        },
+        {
+          "prompt": "Quem devemos obedecer?",
+          "options": [
+            "Deus",
+            "Qualquer pessoa",
+            "Ninguém"
+          ],
+          "answerIndex": 0,
+          "explain": "A Bíblia ensina que Deus ama, cuida e nos ensina a fazer o bem.",
+          "ref": "Bíblia"
+        },
+        {
+          "prompt": "A Bíblia ensina a fazer o quê?",
+          "options": [
+            "O bem",
+            "O mal",
+            "Nada"
+          ],
+          "answerIndex": 0,
+          "explain": "A Bíblia ensina que Deus ama, cuida e nos ensina a fazer o bem.",
+          "ref": "Bíblia"
+        },
+        {
+          "prompt": "Quando erramos, Deus nos dá...",
+          "options": [
+            "Uma nova chance",
+            "Só castigo",
+            "Medo"
+          ],
+          "answerIndex": 0,
+          "explain": "A Bíblia ensina que Deus ama, cuida e nos ensina a fazer o bem.",
+          "ref": "Bíblia"
+        },
+        {
+          "prompt": "Deus cuida das crianças?",
+          "options": [
+            "Sim",
+            "Não",
+            "Só às vezes"
+          ],
+          "answerIndex": 0,
+          "explain": "A Bíblia ensina que Deus ama, cuida e nos ensina a fazer o bem.",
+          "ref": "Bíblia"
+        },
+        {
+          "prompt": "Devemos agradecer a Deus?",
+          "options": [
+            "Sim",
+            "Não",
+            "Nunca"
+          ],
+          "answerIndex": 0,
+          "explain": "A Bíblia ensina que Deus ama, cuida e nos ensina a fazer o bem.",
+          "ref": "Bíblia"
+        },
+        {
+          "prompt": "Deus fica feliz quando somos...",
+          "options": [
+            "Bondosos",
+            "Briguentos",
+            "Egoístas"
+          ],
+          "answerIndex": 0,
+          "explain": "A Bíblia ensina que Deus ama, cuida e nos ensina a fazer o bem.",
+          "ref": "Bíblia"
+        }
+      ],
+      "minigame": {
+        "type": "daniel_shields"
+      }
+    },
+    {
+      "id": "jonas",
+      "title": "Jonas e o Grande Peixe",
+      "short": "Deus dá uma nova chance",
+      "stickerId": "sticker_fish",
+      "story": {
+        "line1": "Jonas aprendeu que deve obedecer a Deus.",
+        "line2": "Deus sempre ama e dá novas chances."
+      },
+      "questions": [
+        {
+          "prompt": "Jonas tentou fugir de Deus indo para...",
+          "options": [
+            "Uma cidade errada",
+            "O jardim",
+            "A escola"
+          ],
+          "answerIndex": 0,
+          "explain": "Jonas tentou fugir do que Deus pediu.",
+          "ref": "Jonas 1"
+        },
+        {
+          "prompt": "Jonas estava em um...",
+          "options": [
+            "Barco",
+            "Carro",
+            "Trem"
+          ],
+          "answerIndex": 0,
+          "explain": "Jonas entrou em um barco.",
+          "ref": "Jonas 1"
+        },
+        {
+          "prompt": "Quem engoliu Jonas?",
+          "options": [
+            "Um grande peixe",
+            "Um leão",
+            "Uma águia"
+          ],
+          "answerIndex": 0,
+          "explain": "Um grande peixe engoliu Jonas.",
+          "ref": "Jonas 1"
+        },
+        {
+          "prompt": "Dentro do peixe, Jonas fez o quê?",
+          "options": [
+            "Orava",
+            "Jogava bola",
+            "Construía uma casa"
+          ],
+          "answerIndex": 0,
+          "explain": "Jonas orou pedindo ajuda.",
+          "ref": "Jonas 2"
+        },
+        {
+          "prompt": "Depois, o peixe...",
+          "options": [
+            "Cuspiu Jonas em terra",
+            "Virou amigo do Jonas",
+            "Voou"
+          ],
+          "answerIndex": 0,
+          "explain": "O peixe deixou Jonas em terra firme.",
+          "ref": "Jonas 2"
+        },
+        {
+          "prompt": "Deus queria que Jonas avisasse qual cidade?",
+          "options": [
+            "Nínive",
+            "Belém",
+            "Jerusalém"
+          ],
+          "answerIndex": 0,
+          "explain": "Deus mandou Jonas a Nínive.",
+          "ref": "Jonas 1"
+        },
+        {
+          "prompt": "O que aprendemos com Jonas?",
+          "options": [
+            "Obedecer e recomeçar",
+            "Fugir sempre",
+            "Ignorar pessoas"
+          ],
+          "answerIndex": 0,
+          "explain": "Deus dá novas chances.",
+          "ref": "Jonas 3"
+        },
+        {
+          "prompt": "Quem ama todas as pessoas?",
+          "options": [
+            "Deus",
+            "Um rei",
+            "Um gigante"
+          ],
+          "answerIndex": 0,
+          "explain": "A Bíblia ensina que Deus ama, cuida e nos ensina a fazer o bem.",
+          "ref": "Bíblia"
+        },
+        {
+          "prompt": "Quem devemos obedecer?",
+          "options": [
+            "Deus",
+            "Qualquer pessoa",
+            "Ninguém"
+          ],
+          "answerIndex": 0,
+          "explain": "A Bíblia ensina que Deus ama, cuida e nos ensina a fazer o bem.",
+          "ref": "Bíblia"
+        },
+        {
+          "prompt": "A Bíblia ensina a fazer o quê?",
+          "options": [
+            "O bem",
+            "O mal",
+            "Nada"
+          ],
+          "answerIndex": 0,
+          "explain": "A Bíblia ensina que Deus ama, cuida e nos ensina a fazer o bem.",
+          "ref": "Bíblia"
+        },
+        {
+          "prompt": "Quando erramos, Deus nos dá...",
+          "options": [
+            "Uma nova chance",
+            "Só castigo",
+            "Medo"
+          ],
+          "answerIndex": 0,
+          "explain": "A Bíblia ensina que Deus ama, cuida e nos ensina a fazer o bem.",
+          "ref": "Bíblia"
+        },
+        {
+          "prompt": "Deus cuida das crianças?",
+          "options": [
+            "Sim",
+            "Não",
+            "Só às vezes"
+          ],
+          "answerIndex": 0,
+          "explain": "A Bíblia ensina que Deus ama, cuida e nos ensina a fazer o bem.",
+          "ref": "Bíblia"
+        },
+        {
+          "prompt": "Devemos agradecer a Deus?",
+          "options": [
+            "Sim",
+            "Não",
+            "Nunca"
+          ],
+          "answerIndex": 0,
+          "explain": "A Bíblia ensina que Deus ama, cuida e nos ensina a fazer o bem.",
+          "ref": "Bíblia"
+        },
+        {
+          "prompt": "Deus fica feliz quando somos...",
+          "options": [
+            "Bondosos",
+            "Briguentos",
+            "Egoístas"
+          ],
+          "answerIndex": 0,
+          "explain": "A Bíblia ensina que Deus ama, cuida e nos ensina a fazer o bem.",
+          "ref": "Bíblia"
+        }
+      ],
+      "minigame": {
+        "type": "jonah_guide"
+      }
+    },
+    {
+      "id": "jesus_nascimento",
+      "title": "O Nascimento de Jesus",
+      "short": "Uma grande alegria!",
+      "stickerId": "sticker_star",
+      "story": {
+        "line1": "Jesus nasceu para trazer luz e amor ao mundo.",
+        "line2": "Os anjos anunciaram uma notícia maravilhosa!"
+      },
+      "questions": [
+        {
+          "prompt": "Onde Jesus nasceu?",
+          "options": [
+            "Em Belém",
+            "Em Nínive",
+            "Em Roma"
+          ],
+          "answerIndex": 0,
+          "explain": "Jesus nasceu em Belém.",
+          "ref": "Lucas 2"
+        },
+        {
+          "prompt": "Quem era a mãe de Jesus?",
+          "options": [
+            "Maria",
+            "Ester",
+            "Sara"
+          ],
+          "answerIndex": 0,
+          "explain": "Maria foi escolhida por Deus.",
+          "ref": "Lucas 1"
+        },
+        {
+          "prompt": "Quem era o pai (na terra) de Jesus?",
+          "options": [
+            "José",
+            "Davi",
+            "Noé"
+          ],
+          "answerIndex": 0,
+          "explain": "José cuidou de Maria e de Jesus.",
+          "ref": "Mateus 1"
+        },
+        {
+          "prompt": "O que apareceu no céu guiando os sábios?",
+          "options": [
+            "Uma estrela",
+            "Um cometa roxo",
+            "Um avião"
+          ],
+          "answerIndex": 0,
+          "explain": "Uma estrela guiou os sábios.",
+          "ref": "Mateus 2"
+        },
+        {
+          "prompt": "Quem recebeu a notícia dos anjos no campo?",
+          "options": [
+            "Pastores",
+            "Soldados",
+            "Reis do Egito"
+          ],
+          "answerIndex": 0,
+          "explain": "Os pastores ouviram a notícia.",
+          "ref": "Lucas 2"
+        },
+        {
+          "prompt": "Qual foi a mensagem alegre dos anjos?",
+          "options": [
+            "Que Jesus nasceu",
+            "Que acabou a água",
+            "Que chegou um circo"
+          ],
+          "answerIndex": 0,
+          "explain": "Os anjos anunciaram o nascimento de Jesus.",
+          "ref": "Lucas 2"
+        },
+        {
+          "prompt": "Jesus veio ao mundo para trazer...",
+          "options": [
+            "Amor e salvação",
+            "Medo",
+            "Confusão"
+          ],
+          "answerIndex": 0,
+          "explain": "Jesus veio para nos amar e salvar.",
+          "ref": "João 3"
+        },
+        {
+          "prompt": "Quem visitou Jesus levando presentes?",
+          "options": [
+            "Sábios (magos)",
+            "Pescadores",
+            "Gigantes"
+          ],
+          "answerIndex": 0,
+          "explain": "Os sábios visitaram Jesus e levaram presentes.",
+          "ref": "Mateus 2"
+        },
+        {
+          "prompt": "Quem ama todas as pessoas?",
+          "options": [
+            "Deus",
+            "Um rei",
+            "Um gigante"
+          ],
+          "answerIndex": 0,
+          "explain": "A Bíblia ensina que Deus ama, cuida e nos ensina a fazer o bem.",
+          "ref": "Bíblia"
+        },
+        {
+          "prompt": "Quem devemos obedecer?",
+          "options": [
+            "Deus",
+            "Qualquer pessoa",
+            "Ninguém"
+          ],
+          "answerIndex": 0,
+          "explain": "A Bíblia ensina que Deus ama, cuida e nos ensina a fazer o bem.",
+          "ref": "Bíblia"
+        },
+        {
+          "prompt": "A Bíblia ensina a fazer o quê?",
+          "options": [
+            "O bem",
+            "O mal",
+            "Nada"
+          ],
+          "answerIndex": 0,
+          "explain": "A Bíblia ensina que Deus ama, cuida e nos ensina a fazer o bem.",
+          "ref": "Bíblia"
+        },
+        {
+          "prompt": "Quando erramos, Deus nos dá...",
+          "options": [
+            "Uma nova chance",
+            "Só castigo",
+            "Medo"
+          ],
+          "answerIndex": 0,
+          "explain": "A Bíblia ensina que Deus ama, cuida e nos ensina a fazer o bem.",
+          "ref": "Bíblia"
+        },
+        {
+          "prompt": "Deus cuida das crianças?",
+          "options": [
+            "Sim",
+            "Não",
+            "Só às vezes"
+          ],
+          "answerIndex": 0,
+          "explain": "A Bíblia ensina que Deus ama, cuida e nos ensina a fazer o bem.",
+          "ref": "Bíblia"
+        },
+        {
+          "prompt": "Devemos agradecer a Deus?",
+          "options": [
+            "Sim",
+            "Não",
+            "Nunca"
+          ],
+          "answerIndex": 0,
+          "explain": "A Bíblia ensina que Deus ama, cuida e nos ensina a fazer o bem.",
+          "ref": "Bíblia"
+        },
+        {
+          "prompt": "Deus fica feliz quando somos...",
+          "options": [
+            "Bondosos",
+            "Briguentos",
+            "Egoístas"
+          ],
+          "answerIndex": 0,
+          "explain": "A Bíblia ensina que Deus ama, cuida e nos ensina a fazer o bem.",
+          "ref": "Bíblia"
+        }
+      ],
+      "minigame": {
+        "type": "star_path"
+      }
+    },
+    {
+      "id": "parabolas",
+      "title": "Parábolas de Jesus",
+      "short": "Histórias que ensinam",
+      "stickerId": "sticker_seed",
+      "story": {
+        "line1": "Jesus contava histórias simples para ensinar coisas importantes.",
+        "line2": "Assim, todos podiam entender e praticar o bem."
+      },
+      "questions": [
+        {
+          "prompt": "Jesus ensinava usando...",
+          "options": [
+            "Parábolas (histórias)",
+            "Apenas gritos",
+            "Somente desenhos"
+          ],
+          "answerIndex": 0,
+          "explain": "Parábolas são histórias que ensinam.",
+          "ref": "Mateus 13"
+        },
+        {
+          "prompt": "Na parábola do semeador, o que foi plantado?",
+          "options": [
+            "Sementes",
+            "Pedras",
+            "Moedas"
+          ],
+          "answerIndex": 0,
+          "explain": "O semeador plantou sementes.",
+          "ref": "Mateus 13"
+        },
+        {
+          "prompt": "Na parábola da ovelha perdida, o pastor procurou...",
+          "options": [
+            "Uma ovelha",
+            "Um leão",
+            "Um barco"
+          ],
+          "answerIndex": 0,
+          "explain": "O pastor procurou a ovelha perdida.",
+          "ref": "Lucas 15"
+        },
+        {
+          "prompt": "Na parábola do bom samaritano, o que ele fez?",
+          "options": [
+            "Ajudou alguém",
+            "Ignorou",
+            "Roubou"
+          ],
+          "answerIndex": 0,
+          "explain": "Ele ajudou com bondade.",
+          "ref": "Lucas 10"
+        },
+        {
+          "prompt": "Jesus disse que devemos amar a...",
+          "options": [
+            "Deus e as pessoas",
+            "Só quem é igual",
+            "Só quem ganha"
+          ],
+          "answerIndex": 0,
+          "explain": "Amar é um ensinamento central.",
+          "ref": "Mateus 22"
+        },
+        {
+          "prompt": "O que é mais importante nas parábolas?",
+          "options": [
+            "Aprender a fazer o bem",
+            "Ganhar discussão",
+            "Ser o mais famoso"
+          ],
+          "answerIndex": 0,
+          "explain": "Jesus ensinou a viver com amor e bondade.",
+          "ref": "Lucas 10"
+        },
+        {
+          "prompt": "Quando fazemos o bem, estamos sendo...",
+          "options": [
+            "Bondosos",
+            "Malvados",
+            "Descuidados"
+          ],
+          "answerIndex": 0,
+          "explain": "Fazer o bem mostra amor.",
+          "ref": "Gálatas 6"
+        },
+        {
+          "prompt": "Quem ama todas as pessoas?",
+          "options": [
+            "Deus",
+            "Um rei",
+            "Um gigante"
+          ],
+          "answerIndex": 0,
+          "explain": "A Bíblia ensina que Deus ama, cuida e nos ensina a fazer o bem.",
+          "ref": "Bíblia"
+        },
+        {
+          "prompt": "Quem devemos obedecer?",
+          "options": [
+            "Deus",
+            "Qualquer pessoa",
+            "Ninguém"
+          ],
+          "answerIndex": 0,
+          "explain": "A Bíblia ensina que Deus ama, cuida e nos ensina a fazer o bem.",
+          "ref": "Bíblia"
+        },
+        {
+          "prompt": "A Bíblia ensina a fazer o quê?",
+          "options": [
+            "O bem",
+            "O mal",
+            "Nada"
+          ],
+          "answerIndex": 0,
+          "explain": "A Bíblia ensina que Deus ama, cuida e nos ensina a fazer o bem.",
+          "ref": "Bíblia"
+        },
+        {
+          "prompt": "Quando erramos, Deus nos dá...",
+          "options": [
+            "Uma nova chance",
+            "Só castigo",
+            "Medo"
+          ],
+          "answerIndex": 0,
+          "explain": "A Bíblia ensina que Deus ama, cuida e nos ensina a fazer o bem.",
+          "ref": "Bíblia"
+        },
+        {
+          "prompt": "Deus cuida das crianças?",
+          "options": [
+            "Sim",
+            "Não",
+            "Só às vezes"
+          ],
+          "answerIndex": 0,
+          "explain": "A Bíblia ensina que Deus ama, cuida e nos ensina a fazer o bem.",
+          "ref": "Bíblia"
+        },
+        {
+          "prompt": "Devemos agradecer a Deus?",
+          "options": [
+            "Sim",
+            "Não",
+            "Nunca"
+          ],
+          "answerIndex": 0,
+          "explain": "A Bíblia ensina que Deus ama, cuida e nos ensina a fazer o bem.",
+          "ref": "Bíblia"
+        },
+        {
+          "prompt": "Deus fica feliz quando somos...",
+          "options": [
+            "Bondosos",
+            "Briguentos",
+            "Egoístas"
+          ],
+          "answerIndex": 0,
+          "explain": "A Bíblia ensina que Deus ama, cuida e nos ensina a fazer o bem.",
+          "ref": "Bíblia"
+        },
+        {
+          "prompt": "Jesus ensinou a amar quem?",
+          "options": [
+            "Somente amigos",
+            "Todas as pessoas",
+            "Só quem é igual"
+          ],
+          "answerIndex": 1,
+          "explain": "Jesus ensinou a amar a todos.",
+          "ref": "Mateus 22"
+        }
+      ],
+      "minigame": {
+        "type": "parables_seed"
+      }
+    }
+  ],
+  "stickers": [
+    {
+      "id": "sticker_sun",
+      "name": "Sol sorridente",
+      "emoji": "🌞",
+      "desc": "Você completou A Criação!"
+    },
+    {
+      "id": "sticker_ark",
+      "name": "Arca colorida",
+      "emoji": "🚢",
+      "desc": "Você completou A Arca de Noé!"
+    },
+    {
+      "id": "sticker_sling",
+      "name": "Estilingue do Davi",
+      "emoji": "🪃",
+      "desc": "Você completou Davi e Golias!"
+    },
+    {
+      "id": "sticker_lion",
+      "name": "Leão amigável",
+      "emoji": "🦁",
+      "desc": "Você completou Daniel na Cova dos Leões!"
+    },
+    {
+      "id": "sticker_fish",
+      "name": "Peixão",
+      "emoji": "🐟",
+      "desc": "Você completou Jonas e o Grande Peixe!"
+    },
+    {
+      "id": "sticker_star",
+      "name": "Estrela brilhante",
+      "emoji": "⭐",
+      "desc": "Você completou O Nascimento de Jesus!"
+    },
+    {
+      "id": "sticker_seed",
+      "name": "Sementinha",
+      "emoji": "🌱",
+      "desc": "Você completou Parábolas de Jesus!"
+    }
+  ]
+}
