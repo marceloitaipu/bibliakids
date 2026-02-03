@@ -21,6 +21,7 @@ export default function RewardScreen({ route, navigation }: Props) {
   const [showStars, setShowStars] = useState(false);
 
   useEffect(() => {
+    console.log('RewardScreen: Salvando estrelas -', { levelId, stars, newStickerId });
     dispatch({ type: 'SET_STARS', levelId, stars, stickerId: stars > 0 ? newStickerId : undefined });
 
     if (stars >= 3) playPerfect();
@@ -30,7 +31,7 @@ export default function RewardScreen({ route, navigation }: Props) {
       setShowStars(true);
       setTimeout(() => setShowStars(false), 1100);
     }
-  }, [dispatch, levelId, stars, newStickerId]);
+  }, []);
 
   const msg =
     stars === 3

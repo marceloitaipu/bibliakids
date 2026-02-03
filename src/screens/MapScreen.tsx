@@ -12,6 +12,9 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Map'>;
 
 export default function MapScreen({ navigation }: Props) {
   const { state, data, dispatch } = useApp();
+  
+  // Debug: mostra as estrelas no console
+  console.log('MapScreen - Estrelas por fase:', state.progress.starsByLevel);
 
   return (
     <View style={{ flex: 1 }}>
