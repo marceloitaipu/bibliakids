@@ -181,7 +181,16 @@ export default function CreationPlaceGame({
         </View>
       </Card>
 
-      <PrimaryButton title="Continuar" onPress={done} disabled={!allPlaced} />
+      <PrimaryButton 
+        title="Continuar" 
+        onPress={() => {
+          if (!allPlaced) {
+            playFail();
+            return;
+          }
+          done();
+        }} 
+      />
     </View>
   );
 }

@@ -42,6 +42,10 @@
         "android.permission.MODIFY_AUDIO_SETTINGS"
       ]
     },
+    "web": {
+      "favicon": "./assets/icon.png",
+      "bundler": "metro"
+    },
     "plugins": [
       [
         "expo-av",

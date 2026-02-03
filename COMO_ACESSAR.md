@@ -6,6 +6,19 @@
 
 ---
 
+## 💻 TESTAR NO COMPUTADOR (NAVEGADOR):
+
+Execute:
+```
+start-expo-web.bat
+```
+
+Isso abrirá o app no navegador em `http://localhost:8081`
+
+**Nota:** Alguns recursos mobile podem não funcionar perfeitamente no navegador.
+
+---
+
 ## 🎯 COMO ACESSAR NO CELULAR:
 
 ### **Método 1: Buscar no Expo Go**

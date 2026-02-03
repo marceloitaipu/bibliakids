@@ -35,7 +35,7 @@ export default function App() {
       <NavigationContainer>
         <StatusBar style="dark" />
         <Stack.Navigator
-          initialRouteName="Avatar"
+          initialRouteName="Map"
           screenOptions={{
             headerStyle: { backgroundColor: theme.colors.bg },
             headerShadowVisible: false,
@@ -43,7 +43,6 @@ export default function App() {
             contentStyle: { backgroundColor: theme.colors.bg },
           }}
         >
-          <Stack.Screen name="Avatar" component={AvatarScreen} options={{ title: 'Seu Avatar' }} />
           <Stack.Screen name="Map" component={MapScreen} options={{ title: 'Mapa de Aventuras' }} />
           <Stack.Screen name="Story" component={StoryScreen} options={{ title: 'História' }} />
           <Stack.Screen name="MiniGame" component={MiniGameScreen} options={{ title: 'Mini-jogo' }} />
