@@ -181,15 +181,24 @@ export default function CreationPlaceGame({
         </View>
       </Card>
 
+      {!allPlaced && (
+        <Card style={{ backgroundColor: theme.colors.warning + '20', padding: 12 }}>
+          <Text style={{ ...theme.typography.small, color: theme.colors.warning, textAlign: 'center' }}>
+            ⚠️ Coloque todos os {pool.length} itens nos lugares certos primeiro!
+          </Text>
+        </Card>
+      )}
+
       <PrimaryButton 
-        title="Continuar" 
+        title={allPlaced ? "Continuar ✓" : "Continuar"} 
         onPress={() => {
           if (!allPlaced) {
             playFail();
             return;
           }
           done();
-        }} 
+        }}
+        variant={allPlaced ? "success" : "primary"}
       />
     </View>
   );
