@@ -26,6 +26,7 @@ export default function MapScreen({ navigation }: Props) {
         {data.levels.map((lvl, idx) => {
           const unlocked = isLevelUnlocked(lvl.id, state.progress.starsByLevel);
           const stars = state.progress.starsByLevel[lvl.id] ?? 0;
+          const prevStars = idx > 0 ? (state.progress.starsByLevel[data.levels[idx - 1].id] ?? 0) : 1;
 
           return (
             <Pressable
@@ -55,7 +56,7 @@ export default function MapScreen({ navigation }: Props) {
                         {idx + 1}. {lvl.title} {unlocked ? '' : '🔒'}
                       </Text>
                       <Text style={{ ...theme.typography.small, color: theme.colors.muted, marginTop: 2 }}>
-                        {lvl.short}
+                        {unlocked ? lvl.short : `Complete a fase ${idx} primeiro!`}
                       </Text>
                     </View>
                   </View>

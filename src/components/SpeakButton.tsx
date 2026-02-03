@@ -21,8 +21,9 @@ export default function SpeakButton({
       Speech.stop();
       Speech.speak(text, {
         language: 'pt-BR',
-        rate: 0.95,
-        pitch: 1.05,
+        rate: 0.9,
+        pitch: 1.2,
+        voice: undefined, // Usa a voz padrão do sistema (geralmente feminina)
       });
     } catch (e) {
       // fail silently (device may not support TTS)
