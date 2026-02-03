@@ -1,4 +1,6 @@
-import React, { useMemo, useState, useRef, useEffect } from 'react';
+// Mini-game: Jogo da Memória - Arca de Noé
+// Encontre os pares de animais! Cartas viradas estilo jogo de memória clássico
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { View, Text, Pressable, Animated, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Card from '../../components/Card';
@@ -6,39 +8,44 @@ import PrimaryButton from '../../components/PrimaryButton';
 import SpeakButton from '../../components/SpeakButton';
 import ConfettiBurst from '../../components/ConfettiBurst';
 import { useSfx } from '../../sfx/useSfx';
+import { useApp } from '../../state/AppState';
 import { theme } from '../../theme';
 import type { MiniGameResult } from '../types';
-import { useApp } from '../../state/AppState';
 
-type Animal = { id: string; name: string; emoji: string };
+type CardData = { id: number; animal: string; emoji: string; matched: boolean };
 
-const ANIMALS: Animal[] = [
-  { id: 'lion', name: 'Leão', emoji: '🦁' },
-  { id: 'elephant', name: 'Elefante', emoji: '🐘' },
-  { id: 'zebra', name: 'Zebra', emoji: '🦓' },
-  { id: 'giraffe', name: 'Girafa', emoji: '🦒' },
-  { id: 'monkey', name: 'Macaco', emoji: '🐒' },
-  { id: 'rabbit', name: 'Coelho', emoji: '🐰' },
-  { id: 'bird', name: 'Pássaro', emoji: '🦅' },
-  { id: 'whale', name: 'Baleia', emoji: '🐋' },
-  { id: 'bear', name: 'Urso', emoji: '🐻' },
-  { id: 'fox', name: 'Raposa', emoji: '🦊' },
+const ANIMALS = [
+  { animal: 'Leão', emoji: '🦁' },
+  { animal: 'Elefante', emoji: '🐘' },
+  { animal: 'Girafa', emoji: '🦒' },
+  { animal: 'Zebra', emoji: '🦓' },
+  { animal: 'Macaco', emoji: '🐒' },
+  { animal: 'Urso', emoji: '🐻' },
+  { animal: 'Coelho', emoji: '🐰' },
+  { animal: 'Raposa', emoji: '🦊' },
 ];
 
-function pickRandom<T>(arr: T[], n: number): T[] {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
+const { width } = Dimensions.get('window');
+const CARD_SIZE = Math.min(70, (width - 80) / 4);
+const TOTAL_TIME = 60;
+
+function createCards(): CardData[] {
+  const pairs = ANIMALS.slice(0, 8);
+  const cards: CardData[] = [];
+  let id = 0;
+  pairs.forEach(p => {
+    cards.push({ id: id++, ...p, matched: false });
+    cards.push({ id: id++, ...p, matched: false });
+  });
+  // Shuffle
+  for (let i = cards.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
+    [cards[i], cards[j]] = [cards[j], cards[i]];
   }
-  return a.slice(0, n);
+  return cards;
 }
 
-const { width } = Dimensions.get('window');
-const cardSize = Math.min(85, (width - 80) / 4);
-
 export default function NoePairsGame({
-  pairsToMatch = 4,
   narrationEnabled,
   onDone,
 }: {
@@ -49,238 +56,254 @@ export default function NoePairsGame({
   const { state } = useApp();
   const { playTap, playFail, playSuccess, playPerfect } = useSfx(state.settings.sound);
 
-  const target = useMemo(() => pickRandom(ANIMALS, Math.max(3, Math.min(5, pairsToMatch))), [pairsToMatch]);
   const [step, setStep] = useState<'intro' | 'play' | 'done'>('intro');
-  const [burst, setBurst] = useState(false);
-  const [combo, setCombo] = useState(0);
-
-  const [picked, setPicked] = useState<Record<string, number>>({});
-  const [mistakes, setMistakes] = useState(0);
-  const [touches, setTouches] = useState(0);
+  const [cards, setCards] = useState<CardData[]>([]);
+  const [flipped, setFlipped] = useState<number[]>([]);
+  const [matched, setMatched] = useState<Set<string>>(new Set());
+  const [moves, setMoves] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(TOTAL_TIME);
   const [startedAt, setStartedAt] = useState<number | null>(null);
+  const [burst, setBurst] = useState(false);
+  const [canFlip, setCanFlip] = useState(true);
 
-  const progressAnim = useRef(new Animated.Value(0)).current;
-  const arkAnim = useRef(new Animated.Value(0)).current;
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const flipAnims = useRef<Animated.Value[]>([]);
 
-  const totalPairs = target.length;
-  const donePairs = Object.values(picked).filter((c) => c >= 2).length;
+  const totalPairs = 8;
+  const matchedPairs = matched.size;
+
+  const finish = useCallback(() => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    setStep('done');
+    playPerfect();
+  }, [playPerfect]);
 
   useEffect(() => {
-    Animated.spring(progressAnim, {
-      toValue: donePairs / totalPairs,
-      useNativeDriver: false,
-    }).start();
-
-    if (donePairs > 0) {
-      Animated.sequence([
-        Animated.timing(arkAnim, { toValue: 1, duration: 150, useNativeDriver: true }),
-        Animated.timing(arkAnim, { toValue: 0, duration: 150, useNativeDriver: true }),
-      ]).start();
+    if (step === 'play' && (matchedPairs >= totalPairs || timeLeft <= 0)) {
+      finish();
     }
-  }, [donePairs, totalPairs, progressAnim, arkAnim]);
+  }, [matchedPairs, timeLeft, step, finish, totalPairs]);
 
-  const instruction = 'Ajude Noé a salvar os animais! Toque duas vezes no mesmo animal para formar o par e entrar na arca.';
+  useEffect(() => {
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, []);
 
   const start = () => {
+    const newCards = createCards();
+    setCards(newCards);
+    flipAnims.current = newCards.map(() => new Animated.Value(0));
     setStartedAt(Date.now());
     setStep('play');
     playTap();
+    
+    timerRef.current = setInterval(() => {
+      setTimeLeft(t => {
+        if (t <= 1) {
+          if (timerRef.current) clearInterval(timerRef.current);
+          return 0;
+        }
+        return t - 1;
+      });
+    }, 1000);
   };
 
-  const finish = () => {
-    const seconds = startedAt ? Math.max(1, Math.round((Date.now() - startedAt) / 1000)) : 1;
-    const accuracy = touches > 0 ? Math.max(0, 1 - mistakes / touches) : 1;
-    const score = Math.round(60 + accuracy * 40);
-    playPerfect();
-    onDone({ completed: true, score, mistakes, seconds });
-    setStep('done');
-  };
-
-  const onPick = (a: Animal) => {
-    setTouches((t) => t + 1);
+  const flipCard = (index: number) => {
+    if (!canFlip || flipped.includes(index) || cards[index].matched) return;
     playTap();
 
-    const isTarget = target.some((x) => x.id === a.id);
-    if (!isTarget) {
-      setMistakes((m) => m + 1);
-      setCombo(0);
-      playFail();
-      return;
-    }
+    const newFlipped = [...flipped, index];
+    setFlipped(newFlipped);
 
-    setPicked((p) => {
-      const prev = p[a.id] ?? 0;
-      const nextCount = Math.min(2, prev + 1);
-      const next = { ...p, [a.id]: nextCount };
-      if (nextCount === 2) {
-        setCombo(c => c + 1);
-        if (combo >= 1) {
-          playPerfect();
-        } else {
-          playSuccess();
-        }
+    // Animate flip
+    Animated.timing(flipAnims.current[index], {
+      toValue: 1,
+      duration: 200,
+      useNativeDriver: true,
+    }).start();
+
+    if (newFlipped.length === 2) {
+      setMoves(m => m + 1);
+      setCanFlip(false);
+      
+      const [first, second] = newFlipped;
+      const card1 = cards[first];
+      const card2 = cards[second];
+
+      if (card1.animal === card2.animal) {
+        // Match!
+        playSuccess();
+        setMatched(m => new Set([...m, card1.animal]));
+        setCards(c => c.map((card, i) => 
+          i === first || i === second ? { ...card, matched: true } : card
+        ));
+        
         if (state.settings.animations) {
           setBurst(true);
-          setTimeout(() => setBurst(false), 650);
+          setTimeout(() => setBurst(false), 400);
         }
+        
+        setFlipped([]);
+        setCanFlip(true);
+      } else {
+        // No match - flip back
+        playFail();
+        setTimeout(() => {
+          Animated.parallel([
+            Animated.timing(flipAnims.current[first], { toValue: 0, duration: 200, useNativeDriver: true }),
+            Animated.timing(flipAnims.current[second], { toValue: 0, duration: 200, useNativeDriver: true }),
+          ]).start(() => {
+            setFlipped([]);
+            setCanFlip(true);
+          });
+        }, 800);
       }
-      return next;
-    });
+    }
   };
 
-  const allDone = donePairs >= totalPairs;
+  const handleDone = () => {
+    const seconds = startedAt ? Math.max(1, Math.round((Date.now() - startedAt) / 1000)) : 1;
+    const efficiency = moves > 0 ? Math.max(0, 1 - (moves - totalPairs) / (totalPairs * 2)) : 1;
+    const timeBonus = timeLeft > 0 ? 0.1 : 0;
+    const finalScore = Math.round((50 + efficiency * 40 + timeBonus * 10) * (matchedPairs / totalPairs));
+    onDone({ completed: matchedPairs >= totalPairs, score: Math.max(50, finalScore), mistakes: moves - matchedPairs, seconds });
+  };
+
+  const instruction = 'Jogo da Memória! Encontre os pares de animais para salvá-los na Arca. Memorize as posições e use poucos movimentos!';
 
   if (step === 'intro') {
     return (
       <View style={{ gap: theme.spacing(2) }}>
         <Card style={{ gap: 16, alignItems: 'center' }}>
-          <Text style={{ fontSize: 64 }}>🚢</Text>
-          <Text style={{ ...theme.typography.title, textAlign: 'center' }}>Arca de Noé</Text>
+          <Text style={{ fontSize: 56 }}>🚢🧠</Text>
+          <Text style={{ ...theme.typography.title, textAlign: 'center' }}>Memória da Arca</Text>
           <Text style={{ ...theme.typography.body, color: theme.colors.muted, textAlign: 'center' }}>
             {instruction}
           </Text>
           <SpeakButton text={instruction} enabled={narrationEnabled} label="Ouvir instruções" />
           
-          <View style={{ flexDirection: 'row', gap: 8, marginTop: 8 }}>
-            {target.slice(0, 3).map((t, i) => (
-              <Text key={i} style={{ fontSize: 32 }}>{t.emoji}{t.emoji}</Text>
-            ))}
+          <View style={{ backgroundColor: theme.colors.primary + '20', padding: 12, borderRadius: 12, width: '100%' }}>
+            <Text style={{ ...theme.typography.small, textAlign: 'center', fontWeight: '700' }}>
+              ⏱️ {TOTAL_TIME}s • 🃏 {totalPairs} pares • 🎯 Menos movimentos = mais pontos!
+            </Text>
           </View>
-          <Text style={{ ...theme.typography.small, color: theme.colors.muted }}>
-            {totalPairs} pares de animais precisam ser salvos!
-          </Text>
         </Card>
-        <PrimaryButton title="🚢 Salvar os Animais!" onPress={start} />
+        <PrimaryButton title="🧠 Jogar!" onPress={start} />
       </View>
     );
   }
 
   if (step === 'done') {
+    const won = matchedPairs >= totalPairs;
+    const efficiency = Math.round((totalPairs / Math.max(1, moves)) * 100);
+    const rating = won && moves <= 12 ? '🏆 PERFEITO!' : won && moves <= 16 ? '⭐ Ótimo!' : won ? '👍 Bom!' : '⏰ Tempo esgotado!';
+    
     return (
       <View style={{ gap: theme.spacing(2) }}>
         <Card style={{ gap: 16, alignItems: 'center', position: 'relative', overflow: 'hidden' }}>
-          <ConfettiBurst show={state.settings.animations} />
-          <Text style={{ fontSize: 64 }}>🌈</Text>
-          <Text style={{ ...theme.typography.title, color: theme.colors.ok }}>Animais Salvos!</Text>
-          <Text style={{ ...theme.typography.body, color: theme.colors.muted, textAlign: 'center' }}>
-            Todos entraram na arca em duplas!
-          </Text>
+          <ConfettiBurst show={state.settings.animations && won} />
+          <Text style={{ fontSize: 56 }}>{won ? '🌈' : '⏰'}</Text>
+          <Text style={{ ...theme.typography.title, color: won ? theme.colors.ok : theme.colors.warn }}>{rating}</Text>
+          
+          <View style={{ backgroundColor: theme.colors.stroke, padding: 16, borderRadius: 16, width: '100%', gap: 10 }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+              <Text style={{ fontWeight: '700' }}>🃏 Pares encontrados:</Text>
+              <Text style={{ fontWeight: '900', color: theme.colors.ok }}>{matchedPairs}/{totalPairs}</Text>
+            </View>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+              <Text style={{ fontWeight: '700' }}>👆 Movimentos:</Text>
+              <Text style={{ fontWeight: '800', color: theme.colors.primary }}>{moves}</Text>
+            </View>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+              <Text style={{ fontWeight: '700' }}>📊 Eficiência:</Text>
+              <Text style={{ fontWeight: '800', color: efficiency >= 80 ? theme.colors.ok : theme.colors.warn }}>{efficiency}%</Text>
+            </View>
+          </View>
         </Card>
+        <PrimaryButton title="✓ Continuar" onPress={handleDone} variant="success" />
       </View>
     );
   }
 
-  const progressWidth = progressAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['0%', '100%'],
-  });
-
-  const arkScale = arkAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [1, 1.15],
-  });
+  const timeColor = timeLeft <= 10 ? theme.colors.bad : timeLeft <= 20 ? theme.colors.warn : theme.colors.ok;
 
   return (
     <View style={{ gap: theme.spacing(1.5) }}>
-      {/* Barra de Progresso */}
-      <View style={{ height: 12, backgroundColor: theme.colors.stroke, borderRadius: 6, overflow: 'hidden' }}>
-        <Animated.View style={{ 
-          height: '100%', 
-          backgroundColor: theme.colors.ok,
-          borderRadius: 6,
-          width: progressWidth,
-        }} />
-      </View>
-
-      {/* Status com Arca Animada */}
+      {/* Header */}
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-          <Animated.Text style={{ fontSize: 28, transform: [{ scale: arkScale }] }}>🚢</Animated.Text>
-          <Text style={{ ...theme.typography.subtitle }}>
-            {donePairs}/{totalPairs} duplas
-          </Text>
+        <View style={{ backgroundColor: timeColor, paddingHorizontal: 14, paddingVertical: 6, borderRadius: 16 }}>
+          <Text style={{ color: '#fff', fontWeight: '900', fontSize: 16 }}>⏱️ {timeLeft}s</Text>
         </View>
-        {combo >= 2 && (
-          <View style={{ backgroundColor: theme.colors.primary, paddingHorizontal: 12, paddingVertical: 4, borderRadius: 12 }}>
-            <Text style={{ color: '#fff', fontWeight: '800', fontSize: 12 }}>🔥 Combo x{combo}!</Text>
-          </View>
-        )}
+        <View style={{ alignItems: 'center' }}>
+          <Text style={{ fontWeight: '800', color: theme.colors.muted }}>👆 {moves}</Text>
+        </View>
+        <View style={{ backgroundColor: theme.colors.ok, paddingHorizontal: 14, paddingVertical: 6, borderRadius: 16 }}>
+          <Text style={{ color: '#fff', fontWeight: '900', fontSize: 16 }}>🃏 {matchedPairs}/{totalPairs}</Text>
+        </View>
       </View>
 
-      {/* Arca - mostra animais salvos */}
-      <LinearGradient
-        colors={['#8B4513', '#A0522D'] as const}
-        style={{ 
-          borderRadius: 20, 
-          padding: 16, 
-          flexDirection: 'row', 
-          flexWrap: 'wrap', 
-          gap: 8,
-          justifyContent: 'center',
-          minHeight: 80,
-        }}
-      >
-        {target.map((t) => {
-          const count = picked[t.id] ?? 0;
-          const completed = count >= 2;
-          return (
-            <View key={t.id} style={{ alignItems: 'center' }}>
-              {completed ? (
-                <Text style={{ fontSize: 32 }}>{t.emoji}{t.emoji}</Text>
-              ) : (
-                <View style={{ flexDirection: 'row' }}>
-                  <Text style={{ fontSize: 32, opacity: count >= 1 ? 1 : 0.3 }}>{count >= 1 ? t.emoji : '❔'}</Text>
-                  <Text style={{ fontSize: 32, opacity: 0.3 }}>❔</Text>
-                </View>
-              )}
-            </View>
-          );
-        })}
+      {/* Arca Visual */}
+      <LinearGradient colors={['#8B4513', '#A0522D'] as const} style={{ borderRadius: 16, padding: 8, alignItems: 'center' }}>
+        <Text style={{ color: '#FFD700', fontWeight: '800', fontSize: 12 }}>🚢 ARCA DE NOÉ 🚢</Text>
       </LinearGradient>
 
-      {/* Animais para escolher */}
-      <Card style={{ gap: 12 }}>
-        <Text style={{ ...theme.typography.subtitle }}>🐾 Escolha os animais:</Text>
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10, justifyContent: 'center' }}>
-          {ANIMALS.map((a) => {
-            const count = picked[a.id] ?? 0;
-            const isTarget = target.some((x) => x.id === a.id);
-            const completed = count >= 2;
-            const partial = count === 1;
+      {/* Cards Grid 4x4 */}
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, justifyContent: 'center' }}>
+        {cards.map((card, index) => {
+          const isFlipped = flipped.includes(index) || card.matched;
+          const flipAnim = flipAnims.current[index] || new Animated.Value(0);
+          
+          const frontRotate = flipAnim.interpolate({
+            inputRange: [0, 1],
+            outputRange: ['0deg', '180deg'],
+          });
+          const backRotate = flipAnim.interpolate({
+            inputRange: [0, 1],
+            outputRange: ['180deg', '360deg'],
+          });
 
-            return (
-              <Pressable 
-                key={a.id} 
-                onPress={() => onPick(a)} 
-                disabled={completed}
-                style={{
-                  width: cardSize,
-                  height: cardSize,
-                  borderWidth: 3,
-                  borderColor: completed ? theme.colors.ok : partial ? theme.colors.primary : theme.colors.stroke,
-                  backgroundColor: completed ? '#E8F5E9' : partial ? theme.colors.primary + '20' : theme.colors.card,
-                  borderRadius: 16,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  opacity: completed ? 0.5 : 1,
-                }}
-              >
-                <Text style={{ fontSize: completed ? 20 : 28 }}>{completed ? '✓' : a.emoji}</Text>
-                {partial && (
-                  <View style={{ position: 'absolute', bottom: 4, backgroundColor: theme.colors.primary, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 8 }}>
-                    <Text style={{ color: '#fff', fontSize: 10, fontWeight: '800' }}>1/2</Text>
+          return (
+            <Pressable key={card.id} onPress={() => flipCard(index)} disabled={!canFlip || card.matched}>
+              <View style={{ width: CARD_SIZE, height: CARD_SIZE }}>
+                {/* Back of card */}
+                <Animated.View style={{
+                  position: 'absolute', width: '100%', height: '100%',
+                  backfaceVisibility: 'hidden',
+                  transform: [{ rotateY: frontRotate }],
+                }}>
+                  <LinearGradient colors={['#3498db', '#2980b9'] as const} style={{
+                    width: '100%', height: '100%', borderRadius: 12,
+                    alignItems: 'center', justifyContent: 'center',
+                    borderWidth: 2, borderColor: '#fff',
+                  }}>
+                    <Text style={{ fontSize: 24 }}>❓</Text>
+                  </LinearGradient>
+                </Animated.View>
+
+                {/* Front of card */}
+                <Animated.View style={{
+                  position: 'absolute', width: '100%', height: '100%',
+                  backfaceVisibility: 'hidden',
+                  transform: [{ rotateY: backRotate }],
+                }}>
+                  <View style={{
+                    width: '100%', height: '100%', borderRadius: 12,
+                    alignItems: 'center', justifyContent: 'center',
+                    backgroundColor: card.matched ? '#E8F5E9' : '#fff',
+                    borderWidth: 2, borderColor: card.matched ? theme.colors.ok : theme.colors.stroke,
+                  }}>
+                    <Text style={{ fontSize: CARD_SIZE * 0.5 }}>{card.emoji}</Text>
                   </View>
-                )}
-              </Pressable>
-            );
-          })}
-        </View>
-      </Card>
+                </Animated.View>
+              </View>
+            </Pressable>
+          );
+        })}
+      </View>
 
-      {/* Botão Continuar */}
-      {allDone && (
-        <PrimaryButton title="🌈 Continuar!" onPress={finish} variant="success" />
-      )}
+      {/* Hint */}
+      <Text style={{ ...theme.typography.small, color: theme.colors.muted, textAlign: 'center' }}>
+        💡 Memorize as posições para encontrar os pares mais rápido!
+      </Text>
 
       <ConfettiBurst show={burst && state.settings.animations} />
     </View>

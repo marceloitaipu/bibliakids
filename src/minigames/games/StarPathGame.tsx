@@ -1,5 +1,7 @@
-import React, { useMemo, useState, useRef, useEffect } from 'react';
-import { View, Text, Pressable, Animated, Dimensions } from 'react-native';
+// Mini-game: Reis Magos - Simon Says com a Estrela!
+// Memorize a sequência de direções que a estrela mostra
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { View, Text, Pressable, Animated } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Card from '../../components/Card';
 import PrimaryButton from '../../components/PrimaryButton';
@@ -10,9 +12,10 @@ import { useApp } from '../../state/AppState';
 import { theme } from '../../theme';
 import type { MiniGameResult } from '../types';
 
-type Choice = 'left' | 'right';
+type Direction = 'up' | 'down' | 'left' | 'right';
 
-const { width } = Dimensions.get('window');
+const DIRECTIONS: Direction[] = ['up', 'down', 'left', 'right'];
+const MAX_LEVEL = 10;
 
 export default function StarPathGame({
   narrationEnabled,
@@ -24,100 +27,147 @@ export default function StarPathGame({
   const { state } = useApp();
   const { playTap, playFail, playSuccess, playPerfect } = useSfx(state.settings.sound);
 
-  const [step, setStep] = useState<'intro' | 'play' | 'done'>('intro');
-  const [idx, setIdx] = useState(0);
-  const [mistakes, setMistakes] = useState(0);
-  const [touches, setTouches] = useState(0);
+  const [step, setStep] = useState<'intro' | 'showing' | 'playing' | 'done'>('intro');
+  const [sequence, setSequence] = useState<Direction[]>([]);
+  const [playerInput, setPlayerInput] = useState<Direction[]>([]);
+  const [level, setLevel] = useState(1);
+  const [lives, setLives] = useState(3);
+  const [score, setScore] = useState(0);
+  const [highlightedDir, setHighlightedDir] = useState<Direction | null>(null);
   const [startedAt, setStartedAt] = useState<number | null>(null);
   const [burst, setBurst] = useState(false);
-  const [lastResult, setLastResult] = useState<'correct' | 'wrong' | null>(null);
-  const [combo, setCombo] = useState(0);
+  const [showingIndex, setShowingIndex] = useState(0);
 
   const starAnim = useRef(new Animated.Value(1)).current;
-  const progressAnim = useRef(new Animated.Value(0)).current;
   const shakeAnim = useRef(new Animated.Value(0)).current;
 
-  const path = useMemo(() => {
-    const arr: Choice[] = [];
-    for (let i = 0; i < 6; i++) arr.push(Math.random() > 0.5 ? 'left' : 'right');
-    return arr;
+  const addToSequence = useCallback(() => {
+    const newDir = DIRECTIONS[Math.floor(Math.random() * DIRECTIONS.length)];
+    setSequence(s => [...s, newDir]);
   }, []);
 
-  const instruction = 'Os Reis Magos seguem a estrela até Jesus! Escolha o caminho certo em cada passo para chegar a Belém.';
+  const showSequence = useCallback(async () => {
+    setStep('showing');
+    setPlayerInput([]);
+    setShowingIndex(0);
 
+    // Add new direction to sequence
+    addToSequence();
+  }, [addToSequence]);
+
+  // Effect to show sequence one by one
   useEffect(() => {
-    Animated.spring(progressAnim, {
-      toValue: idx / path.length,
-      useNativeDriver: false,
-    }).start();
-  }, [idx, path.length, progressAnim]);
+    if (step !== 'showing') return;
+    
+    if (showingIndex < sequence.length) {
+      const timer = setTimeout(() => {
+        setHighlightedDir(sequence[showingIndex]);
+        playTap();
+        
+        // Star animation
+        Animated.sequence([
+          Animated.timing(starAnim, { toValue: 1.3, duration: 150, useNativeDriver: true }),
+          Animated.timing(starAnim, { toValue: 1, duration: 150, useNativeDriver: true }),
+        ]).start();
+
+        setTimeout(() => {
+          setHighlightedDir(null);
+          setShowingIndex(i => i + 1);
+        }, 400);
+      }, 600);
+      
+      return () => clearTimeout(timer);
+    } else {
+      // Done showing
+      const timer = setTimeout(() => {
+        setStep('playing');
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [step, showingIndex, sequence, playTap, starAnim]);
 
   const start = () => {
     setStartedAt(Date.now());
-    setStep('play');
-    playTap();
-    
-    // Animação pulsante da estrela
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(starAnim, { toValue: 1.2, duration: 800, useNativeDriver: true }),
-        Animated.timing(starAnim, { toValue: 1, duration: 800, useNativeDriver: true }),
-      ])
-    ).start();
+    setSequence([]);
+    setPlayerInput([]);
+    setLevel(1);
+    setLives(3);
+    setScore(0);
+    showSequence();
   };
 
-  const pick = (c: Choice) => {
-    setTouches(t => t + 1);
-    const correct = path[idx];
+  const tapDirection = (dir: Direction) => {
+    if (step !== 'playing') return;
     
-    if (c !== correct) {
-      setMistakes(m => m + 1);
-      setCombo(0);
-      setLastResult('wrong');
+    playTap();
+    setHighlightedDir(dir);
+    setTimeout(() => setHighlightedDir(null), 200);
+
+    const newInput = [...playerInput, dir];
+    setPlayerInput(newInput);
+
+    const currentIndex = newInput.length - 1;
+    
+    if (dir !== sequence[currentIndex]) {
+      // Wrong!
       playFail();
+      setLives(l => l - 1);
       
-      // Shake animation
       Animated.sequence([
         Animated.timing(shakeAnim, { toValue: 15, duration: 50, useNativeDriver: true }),
         Animated.timing(shakeAnim, { toValue: -15, duration: 50, useNativeDriver: true }),
-        Animated.timing(shakeAnim, { toValue: 15, duration: 50, useNativeDriver: true }),
         Animated.timing(shakeAnim, { toValue: 0, duration: 50, useNativeDriver: true }),
       ]).start();
-    } else {
-      setCombo(c => c + 1);
-      setLastResult('correct');
-      
-      if (combo >= 2) {
-        playPerfect();
-      } else {
-        playSuccess();
+
+      if (lives <= 1) {
+        setStep('done');
+        return;
       }
       
-      if (state.settings.animations) {
-        setBurst(true);
-        setTimeout(() => setBurst(false), 400);
-      }
+      // Retry same level
+      setTimeout(() => {
+        setPlayerInput([]);
+        setShowingIndex(0);
+        setStep('showing');
+      }, 1000);
+      
+      return;
     }
 
-    setTimeout(() => {
-      setLastResult(null);
-      const next = idx + 1;
-      if (next >= path.length) {
-        finish();
+    // Correct so far
+    if (newInput.length === sequence.length) {
+      // Completed the sequence!
+      const points = level * 100 + sequence.length * 20;
+      setScore(s => s + points);
+      
+      if (level >= MAX_LEVEL) {
+        playPerfect();
+        if (state.settings.animations) {
+          setBurst(true);
+          setTimeout(() => setBurst(false), 600);
+        }
+        setStep('done');
       } else {
-        setIdx(next);
+        playSuccess();
+        if (state.settings.animations) {
+          setBurst(true);
+          setTimeout(() => setBurst(false), 400);
+        }
+        setLevel(l => l + 1);
+        setTimeout(() => {
+          showSequence();
+        }, 1000);
       }
-    }, 500);
+    }
   };
 
-  const finish = () => {
+  const handleDone = () => {
     const seconds = startedAt ? Math.max(1, Math.round((Date.now() - startedAt) / 1000)) : 1;
-    const accuracy = touches > 0 ? Math.max(0, 1 - mistakes / touches) : 1;
-    const score = Math.round(55 + accuracy * 45);
-    playPerfect();
-    onDone({ completed: true, score, mistakes, seconds });
-    setStep('done');
+    const finalScore = Math.round(40 + (level / MAX_LEVEL) * 60);
+    onDone({ completed: level >= MAX_LEVEL, score: finalScore, mistakes: 3 - lives, seconds });
   };
+
+  const instruction = 'Siga a Estrela de Belém! Memorize a sequência de direções que a estrela mostra e repita na ordem correta. A cada nível, a sequência fica mais longa!';
 
   if (step === 'intro') {
     return (
@@ -125,17 +175,19 @@ export default function StarPathGame({
         <Card style={{ gap: 16, alignItems: 'center' }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
             <Text style={{ fontSize: 36 }}>👑👑👑</Text>
-            <Text style={{ fontSize: 28 }}>➡️</Text>
-            <Text style={{ fontSize: 48 }}>⭐</Text>
+            <Text style={{ fontSize: 50 }}>⭐</Text>
           </View>
-          <Text style={{ ...theme.typography.title, textAlign: 'center' }}>Seguir a Estrela</Text>
+          <Text style={{ ...theme.typography.title, textAlign: 'center' }}>Siga a Estrela</Text>
           <Text style={{ ...theme.typography.body, color: theme.colors.muted, textAlign: 'center' }}>
             {instruction}
           </Text>
           <SpeakButton text={instruction} enabled={narrationEnabled} label="Ouvir instruções" />
-          <Text style={{ ...theme.typography.small, color: theme.colors.muted }}>
-            {path.length} passos até Belém!
-          </Text>
+          
+          <View style={{ backgroundColor: theme.colors.primary + '20', padding: 12, borderRadius: 12, width: '100%' }}>
+            <Text style={{ ...theme.typography.small, textAlign: 'center', fontWeight: '700' }}>
+              ❤️ 3 vidas • 🎯 {MAX_LEVEL} níveis • 🧠 Memorize a sequência!
+            </Text>
+          </View>
         </Card>
         <PrimaryButton title="⭐ Seguir a Estrela!" onPress={start} />
       </View>
@@ -143,183 +195,207 @@ export default function StarPathGame({
   }
 
   if (step === 'done') {
+    const won = level >= MAX_LEVEL;
+    const rating = won ? '🏆 SÁBIO DE VERDADE!' : level >= 7 ? '⭐ Quase lá!' : level >= 4 ? '👍 Bom progresso!' : '🧠 Treine sua memória!';
+    
     return (
       <View style={{ gap: theme.spacing(2) }}>
         <Card style={{ gap: 16, alignItems: 'center', position: 'relative', overflow: 'hidden' }}>
-          <ConfettiBurst show={state.settings.animations} />
-          <Text style={{ fontSize: 64 }}>👶</Text>
-          <Text style={{ ...theme.typography.title, color: theme.colors.ok }}>Chegaram a Belém!</Text>
-          <Text style={{ ...theme.typography.body, color: theme.colors.muted, textAlign: 'center' }}>
-            Os Reis Magos encontraram o menino Jesus!
-          </Text>
+          <ConfettiBurst show={state.settings.animations && won} />
+          <Text style={{ fontSize: 56 }}>{won ? '👶⭐' : '⭐'}</Text>
+          <Text style={{ ...theme.typography.title, color: won ? theme.colors.ok : theme.colors.warn }}>{rating}</Text>
+          
+          <View style={{ backgroundColor: theme.colors.stroke, padding: 16, borderRadius: 16, width: '100%', gap: 10 }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+              <Text style={{ fontWeight: '700' }}>💎 Pontuação:</Text>
+              <Text style={{ fontWeight: '900', color: theme.colors.primary, fontSize: 18 }}>{score}</Text>
+            </View>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+              <Text style={{ fontWeight: '700' }}>📊 Nível alcançado:</Text>
+              <Text style={{ fontWeight: '800', color: theme.colors.ok }}>{level}/{MAX_LEVEL}</Text>
+            </View>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+              <Text style={{ fontWeight: '700' }}>🧠 Maior sequência:</Text>
+              <Text style={{ fontWeight: '800', color: theme.colors.primary2 }}>{sequence.length} direções</Text>
+            </View>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+              <Text style={{ fontWeight: '700' }}>❤️ Vidas restantes:</Text>
+              <Text style={{ fontWeight: '800', color: lives > 0 ? theme.colors.ok : theme.colors.bad }}>{lives}/3</Text>
+            </View>
+          </View>
         </Card>
+        <PrimaryButton title="✓ Continuar" onPress={handleDone} variant="success" />
       </View>
     );
   }
 
-  const progressWidth = progressAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['0%', '100%'],
-  });
+  const dirColors: Record<Direction, readonly [string, string]> = {
+    up: ['#4CAF50', '#388E3C'] as const,
+    down: ['#FF9800', '#F57C00'] as const,
+    left: ['#2196F3', '#1976D2'] as const,
+    right: ['#9C27B0', '#7B1FA2'] as const,
+  };
 
-  // Determinar qual caminho é correto para dar dica visual sutil
-  const correctPath = path[idx];
+  const dirEmoji: Record<Direction, string> = {
+    up: '⬆️',
+    down: '⬇️',
+    left: '⬅️',
+    right: '➡️',
+  };
 
   return (
     <View style={{ gap: theme.spacing(1.5) }}>
-      {/* Barra de Progresso */}
-      <View style={{ height: 12, backgroundColor: theme.colors.stroke, borderRadius: 6, overflow: 'hidden' }}>
-        <Animated.View style={{ 
-          height: '100%', 
-          backgroundColor: '#FFD700',
-          borderRadius: 6,
-          width: progressWidth,
-        }} />
-      </View>
-
-      {/* Status */}
+      {/* Header */}
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Text style={{ ...theme.typography.subtitle }}>
-          📍 Passo {idx + 1}/{path.length}
-        </Text>
-        {combo >= 2 && (
-          <View style={{ backgroundColor: '#FFD700', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 }}>
-            <Text style={{ color: '#333', fontWeight: '800', fontSize: 12 }}>⭐ Combo x{combo}!</Text>
-          </View>
-        )}
+        <View style={{ flexDirection: 'row', gap: 4 }}>
+          {[...Array(3)].map((_, i) => (
+            <Text key={i} style={{ fontSize: 20, opacity: i < lives ? 1 : 0.3 }}>❤️</Text>
+          ))}
+        </View>
+        <View style={{ backgroundColor: theme.colors.ok, paddingHorizontal: 14, paddingVertical: 6, borderRadius: 16 }}>
+          <Text style={{ color: '#fff', fontWeight: '900', fontSize: 14 }}>Nível {level}/{MAX_LEVEL}</Text>
+        </View>
+        <View style={{ backgroundColor: theme.colors.primary, paddingHorizontal: 14, paddingVertical: 6, borderRadius: 16 }}>
+          <Text style={{ color: '#fff', fontWeight: '900', fontSize: 16 }}>💎 {score}</Text>
+        </View>
       </View>
 
-      {/* Céu Noturno com Estrela */}
+      {/* Star Display */}
       <Animated.View style={{ transform: [{ translateX: shakeAnim }] }}>
-        <LinearGradient
-          colors={['#1a1a2e', '#16213e', '#0f3460'] as const}
-          style={{ 
-            borderRadius: 20, 
-            padding: 24,
-            alignItems: 'center',
-            minHeight: 180,
-            justifyContent: 'center',
-          }}
-        >
-          {/* Estrelinhas de fundo */}
-          <View style={{ position: 'absolute', top: 20, left: 30 }}>
-            <Text style={{ fontSize: 12, opacity: 0.5 }}>✨</Text>
-          </View>
-          <View style={{ position: 'absolute', top: 40, right: 40 }}>
-            <Text style={{ fontSize: 10, opacity: 0.4 }}>✨</Text>
-          </View>
-          <View style={{ position: 'absolute', bottom: 30, left: 50 }}>
-            <Text style={{ fontSize: 8, opacity: 0.3 }}>✨</Text>
-          </View>
-          <View style={{ position: 'absolute', bottom: 50, right: 60 }}>
-            <Text style={{ fontSize: 14, opacity: 0.4 }}>✨</Text>
-          </View>
-
-          {/* Estrela Principal */}
-          <Animated.Text style={{ 
-            fontSize: 72, 
-            transform: [{ scale: starAnim }],
-            textShadowColor: '#FFD700',
-            textShadowOffset: { width: 0, height: 0 },
-            textShadowRadius: 20,
-          }}>
-            ⭐
-          </Animated.Text>
-
-          {/* Feedback Visual */}
-          {lastResult && (
-            <View style={{ 
+        <LinearGradient colors={['#1a1a2e', '#16213e'] as const} style={{ 
+          borderRadius: 20, padding: 24, alignItems: 'center', minHeight: 180,
+        }}>
+          {/* Decorative stars */}
+          {[...Array(8)].map((_, i) => (
+            <View key={i} style={{ 
               position: 'absolute', 
-              bottom: 20,
-              backgroundColor: lastResult === 'correct' ? theme.colors.ok : theme.colors.bad,
-              paddingHorizontal: 16,
-              paddingVertical: 8,
-              borderRadius: 20,
+              top: 10 + Math.random() * 100,
+              left: 20 + Math.random() * 200,
             }}>
-              <Text style={{ color: '#fff', fontWeight: '800' }}>
-                {lastResult === 'correct' ? '✓ Caminho certo!' : '✗ Tente o outro lado!'}
-              </Text>
+              <Text style={{ fontSize: 8 + Math.random() * 8, opacity: 0.3 + Math.random() * 0.4 }}>✨</Text>
+            </View>
+          ))}
+
+          {/* Main Star */}
+          <Animated.View style={{ transform: [{ scale: starAnim }] }}>
+            <Text style={{ 
+              fontSize: 80,
+              textShadowColor: '#FFD700',
+              textShadowOffset: { width: 0, height: 0 },
+              textShadowRadius: highlightedDir ? 30 : 15,
+            }}>⭐</Text>
+          </Animated.View>
+
+          {/* Direction indicator when showing */}
+          {highlightedDir && (
+            <View style={{ position: 'absolute', bottom: 20 }}>
+              <Text style={{ fontSize: 40 }}>{dirEmoji[highlightedDir]}</Text>
             </View>
           )}
 
-          {/* Reis Magos */}
+          {/* Status text */}
           <View style={{ position: 'absolute', bottom: 10 }}>
-            <Text style={{ fontSize: 24 }}>👑👑👑🐫</Text>
+            <Text style={{ color: '#fff', fontWeight: '700', fontSize: 14 }}>
+              {step === 'showing' ? `Observe... (${showingIndex}/${sequence.length})` : `Sua vez! (${playerInput.length}/${sequence.length})`}
+            </Text>
+          </View>
+
+          {/* Wise men */}
+          <View style={{ position: 'absolute', bottom: 5, right: 20 }}>
+            <Text style={{ fontSize: 20 }}>👑👑👑</Text>
           </View>
         </LinearGradient>
       </Animated.View>
 
-      {/* Texto de Instrução */}
-      <Card style={{ padding: 12 }}>
-        <Text style={{ ...theme.typography.body, textAlign: 'center' }}>
-          Para onde a estrela guia? 🤔
-        </Text>
-      </Card>
-
-      {/* Botões de Escolha */}
-      <View style={{ flexDirection: 'row', gap: 12 }}>
-        <Pressable 
-          onPress={() => pick('left')} 
-          style={{ flex: 1 }}
-          disabled={lastResult !== null}
-        >
-          <LinearGradient
-            colors={['#667eea', '#764ba2'] as const}
-            style={{
-              borderRadius: 20,
-              paddingVertical: 20,
-              alignItems: 'center',
-              opacity: lastResult !== null ? 0.5 : 1,
-              borderWidth: 3,
-              borderColor: correctPath === 'left' ? '#FFD700' : 'transparent',
-            }}
-          >
-            <Text style={{ fontSize: 36 }}>⬅️</Text>
-            <Text style={{ 
-              color: '#fff', 
-              fontWeight: '800', 
-              fontSize: 16,
-              marginTop: 4,
-            }}>
-              Esquerda
-            </Text>
-          </LinearGradient>
-        </Pressable>
-
-        <Pressable 
-          onPress={() => pick('right')} 
-          style={{ flex: 1 }}
-          disabled={lastResult !== null}
-        >
-          <LinearGradient
-            colors={['#f093fb', '#f5576c'] as const}
-            style={{
-              borderRadius: 20,
-              paddingVertical: 20,
-              alignItems: 'center',
-              opacity: lastResult !== null ? 0.5 : 1,
-              borderWidth: 3,
-              borderColor: correctPath === 'right' ? '#FFD700' : 'transparent',
-            }}
-          >
-            <Text style={{ fontSize: 36 }}>➡️</Text>
-            <Text style={{ 
-              color: '#fff', 
-              fontWeight: '800', 
-              fontSize: 16,
-              marginTop: 4,
-            }}>
-              Direita
-            </Text>
-          </LinearGradient>
-        </Pressable>
+      {/* Progress dots */}
+      <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 6 }}>
+        {sequence.map((_, i) => (
+          <View key={i} style={{
+            width: 12, height: 12, borderRadius: 6,
+            backgroundColor: i < playerInput.length ? theme.colors.ok : theme.colors.stroke,
+          }} />
+        ))}
       </View>
 
-      {mistakes > 0 && (
-        <Text style={{ ...theme.typography.small, color: theme.colors.muted, textAlign: 'center' }}>
-          Erros: {mistakes} • Observe o brilho da estrela para a dica!
-        </Text>
-      )}
+      {/* Direction Buttons */}
+      <View style={{ gap: 8 }}>
+        {/* Up */}
+        <View style={{ alignItems: 'center' }}>
+          <Pressable 
+            onPress={() => tapDirection('up')} 
+            disabled={step !== 'playing'}
+            style={{ opacity: step === 'playing' ? 1 : 0.5 }}
+          >
+            <LinearGradient 
+              colors={dirColors.up} 
+              style={{
+                width: 80, height: 60, borderRadius: 14, alignItems: 'center', justifyContent: 'center',
+                opacity: highlightedDir === 'up' ? 1 : 0.7,
+                transform: [{ scale: highlightedDir === 'up' ? 1.1 : 1 }],
+              }}
+            >
+              <Text style={{ fontSize: 32 }}>⬆️</Text>
+            </LinearGradient>
+          </Pressable>
+        </View>
+        
+        {/* Left + Right */}
+        <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 60 }}>
+          <Pressable 
+            onPress={() => tapDirection('left')} 
+            disabled={step !== 'playing'}
+            style={{ opacity: step === 'playing' ? 1 : 0.5 }}
+          >
+            <LinearGradient 
+              colors={dirColors.left} 
+              style={{
+                width: 80, height: 60, borderRadius: 14, alignItems: 'center', justifyContent: 'center',
+                opacity: highlightedDir === 'left' ? 1 : 0.7,
+                transform: [{ scale: highlightedDir === 'left' ? 1.1 : 1 }],
+              }}
+            >
+              <Text style={{ fontSize: 32 }}>⬅️</Text>
+            </LinearGradient>
+          </Pressable>
+          
+          <Pressable 
+            onPress={() => tapDirection('right')} 
+            disabled={step !== 'playing'}
+            style={{ opacity: step === 'playing' ? 1 : 0.5 }}
+          >
+            <LinearGradient 
+              colors={dirColors.right} 
+              style={{
+                width: 80, height: 60, borderRadius: 14, alignItems: 'center', justifyContent: 'center',
+                opacity: highlightedDir === 'right' ? 1 : 0.7,
+                transform: [{ scale: highlightedDir === 'right' ? 1.1 : 1 }],
+              }}
+            >
+              <Text style={{ fontSize: 32 }}>➡️</Text>
+            </LinearGradient>
+          </Pressable>
+        </View>
+        
+        {/* Down */}
+        <View style={{ alignItems: 'center' }}>
+          <Pressable 
+            onPress={() => tapDirection('down')} 
+            disabled={step !== 'playing'}
+            style={{ opacity: step === 'playing' ? 1 : 0.5 }}
+          >
+            <LinearGradient 
+              colors={dirColors.down} 
+              style={{
+                width: 80, height: 60, borderRadius: 14, alignItems: 'center', justifyContent: 'center',
+                opacity: highlightedDir === 'down' ? 1 : 0.7,
+                transform: [{ scale: highlightedDir === 'down' ? 1.1 : 1 }],
+              }}
+            >
+              <Text style={{ fontSize: 32 }}>⬇️</Text>
+            </LinearGradient>
+          </Pressable>
+        </View>
+      </View>
 
       <ConfettiBurst show={burst && state.settings.animations} />
     </View>

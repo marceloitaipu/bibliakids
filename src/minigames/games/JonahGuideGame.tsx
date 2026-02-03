@@ -1,5 +1,7 @@
-import React, { useMemo, useState, useRef, useEffect } from 'react';
-import { View, Text, Pressable, Animated, Dimensions } from 'react-native';
+// Mini-game: Jonas - Fuja das Tempestades!
+// Desvie dos obstáculos no mar enquanto a baleia leva Jonas para a segurança
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { View, Text, Pressable, Animated, Dimensions, PanResponder } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Card from '../../components/Card';
 import PrimaryButton from '../../components/PrimaryButton';
@@ -10,14 +12,26 @@ import { useApp } from '../../state/AppState';
 import { theme } from '../../theme';
 import type { MiniGameResult } from '../types';
 
-type Lane = 0 | 1 | 2;
+const { width, height } = Dimensions.get('window');
+const GAME_WIDTH = Math.min(width - 40, 350);
+const GAME_HEIGHT = 300;
+const WHALE_SIZE = 50;
+const OBSTACLE_SIZE = 40;
+const TOTAL_DISTANCE = 100;
 
-function randLane(): Lane {
-  return Math.floor(Math.random() * 3) as Lane;
-}
+type Obstacle = {
+  id: number;
+  x: number;
+  y: number;
+  type: 'storm' | 'rock' | 'whirlpool';
+  emoji: string;
+};
 
-const { width } = Dimensions.get('window');
-const laneHeight = 70;
+const OBSTACLE_TYPES = [
+  { type: 'storm' as const, emoji: '⛈️' },
+  { type: 'rock' as const, emoji: '🪨' },
+  { type: 'whirlpool' as const, emoji: '🌀' },
+];
 
 export default function JonahGuideGame({
   narrationEnabled,
@@ -30,313 +44,316 @@ export default function JonahGuideGame({
   const { playTap, playFail, playSuccess, playPerfect } = useSfx(state.settings.sound);
 
   const [step, setStep] = useState<'intro' | 'play' | 'done'>('intro');
-  const [lane, setLane] = useState<Lane>(1);
-  const [pos, setPos] = useState(0);
-  const [mistakes, setMistakes] = useState(0);
-  const [touches, setTouches] = useState(0);
+  const [whaleY, setWhaleY] = useState(GAME_HEIGHT / 2);
+  const [obstacles, setObstacles] = useState<Obstacle[]>([]);
+  const [distance, setDistance] = useState(0);
+  const [lives, setLives] = useState(3);
+  const [score, setScore] = useState(0);
   const [startedAt, setStartedAt] = useState<number | null>(null);
   const [burst, setBurst] = useState(false);
-  const [hitEffect, setHitEffect] = useState(false);
-  const [combo, setCombo] = useState(0);
+  const [isHit, setIsHit] = useState(false);
+  const [speed, setSpeed] = useState(30); // ms per game tick
 
-  const progressAnim = useRef(new Animated.Value(0)).current;
-  const fishAnim = useRef(new Animated.Value(1)).current;
+  const gameLoopRef = useRef<NodeJS.Timeout | null>(null);
+  const obstacleIdRef = useRef(0);
   const shakeAnim = useRef(new Animated.Value(0)).current;
+  const whaleAnim = useRef(new Animated.Value(1)).current;
 
-  const obstacles = useMemo(() => {
-    const arr = [];
-    for (let i = 0; i < 10; i++) {
-      arr.push({ at: (i + 1) * 10, lane: randLane() });
+  const moveWhale = (direction: 'up' | 'down') => {
+    playTap();
+    setWhaleY(y => {
+      const newY = direction === 'up' ? y - 30 : y + 30;
+      return Math.max(WHALE_SIZE / 2, Math.min(GAME_HEIGHT - WHALE_SIZE / 2, newY));
+    });
+  };
+
+  const checkCollision = useCallback((whalePos: number, obs: Obstacle[]): Obstacle | null => {
+    const whaleLeft = 30;
+    const whaleRight = 30 + WHALE_SIZE;
+    const whaleTop = whalePos - WHALE_SIZE / 2;
+    const whaleBottom = whalePos + WHALE_SIZE / 2;
+
+    for (const o of obs) {
+      const obsLeft = o.x;
+      const obsRight = o.x + OBSTACLE_SIZE;
+      const obsTop = o.y;
+      const obsBottom = o.y + OBSTACLE_SIZE;
+
+      if (whaleRight > obsLeft && whaleLeft < obsRight && 
+          whaleBottom > obsTop && whaleTop < obsBottom) {
+        return o;
+      }
     }
-    return arr;
+    return null;
   }, []);
 
-  const instruction = 'Guie o grande peixe para salvar Jonas! Desvie das algas tocando nas setas para mudar de pista.';
+  const finish = useCallback((won: boolean) => {
+    if (gameLoopRef.current) clearInterval(gameLoopRef.current);
+    setStep('done');
+    if (won) playPerfect();
+    else playFail();
+  }, [playFail, playPerfect]);
 
+  const gameLoop = useCallback(() => {
+    setDistance(d => {
+      const newDist = d + 1;
+      if (newDist >= TOTAL_DISTANCE) {
+        finish(true);
+      }
+      return newDist;
+    });
+
+    // Move obstacles left
+    setObstacles(obs => {
+      const moved = obs.map(o => ({ ...o, x: o.x - 8 })).filter(o => o.x > -OBSTACLE_SIZE);
+      
+      // Spawn new obstacles
+      if (Math.random() < 0.15) {
+        const type = OBSTACLE_TYPES[Math.floor(Math.random() * OBSTACLE_TYPES.length)];
+        moved.push({
+          id: obstacleIdRef.current++,
+          x: GAME_WIDTH,
+          y: Math.random() * (GAME_HEIGHT - OBSTACLE_SIZE),
+          ...type,
+        });
+      }
+      
+      return moved;
+    });
+
+    // Add score for surviving
+    setScore(s => s + 5);
+  }, [finish]);
+
+  // Check collisions in separate effect
   useEffect(() => {
-    Animated.spring(progressAnim, {
-      toValue: pos / 100,
-      useNativeDriver: false,
-    }).start();
-  }, [pos, progressAnim]);
+    if (step !== 'play' || isHit) return;
+    
+    const hit = checkCollision(whaleY, obstacles);
+    if (hit) {
+      setIsHit(true);
+      playFail();
+      setLives(l => {
+        const newLives = l - 1;
+        if (newLives <= 0) {
+          finish(false);
+        }
+        return newLives;
+      });
+      
+      // Remove the obstacle that hit
+      setObstacles(obs => obs.filter(o => o.id !== hit.id));
+      
+      // Shake animation
+      Animated.sequence([
+        Animated.timing(shakeAnim, { toValue: 15, duration: 50, useNativeDriver: true }),
+        Animated.timing(shakeAnim, { toValue: -15, duration: 50, useNativeDriver: true }),
+        Animated.timing(shakeAnim, { toValue: 0, duration: 50, useNativeDriver: true }),
+      ]).start();
+      
+      setTimeout(() => setIsHit(false), 500);
+    }
+  }, [whaleY, obstacles, step, isHit, checkCollision, playFail, finish, shakeAnim]);
 
   const start = () => {
     setStartedAt(Date.now());
     setStep('play');
     playTap();
+    setWhaleY(GAME_HEIGHT / 2);
+    setObstacles([]);
+    setDistance(0);
+    setLives(3);
+    setScore(0);
+    
+    gameLoopRef.current = setInterval(gameLoop, speed);
   };
 
-  const move = (dir: -1 | 1) => {
-    setTouches(t => t + 1);
-    playTap();
-    
-    setLane(l => {
-      const next = (l + dir) as Lane;
-      if (next < 0 || next > 2) return l;
-      return next;
-    });
+  useEffect(() => {
+    return () => {
+      if (gameLoopRef.current) clearInterval(gameLoopRef.current);
+    };
+  }, []);
 
-    // Animação do peixe
-    Animated.sequence([
-      Animated.timing(fishAnim, { toValue: 1.2, duration: 100, useNativeDriver: true }),
-      Animated.timing(fishAnim, { toValue: 1, duration: 100, useNativeDriver: true }),
-    ]).start();
-  };
-
-  const tick = () => {
-    const nextPos = pos + 10;
-    const hit = obstacles.some(o => o.at === nextPos && o.lane === lane);
-    
-    if (hit) {
-      setMistakes(m => m + 1);
-      setCombo(0);
-      setHitEffect(true);
-      playFail();
-      
-      // Animação de shake
-      Animated.sequence([
-        Animated.timing(shakeAnim, { toValue: 10, duration: 50, useNativeDriver: true }),
-        Animated.timing(shakeAnim, { toValue: -10, duration: 50, useNativeDriver: true }),
-        Animated.timing(shakeAnim, { toValue: 10, duration: 50, useNativeDriver: true }),
-        Animated.timing(shakeAnim, { toValue: 0, duration: 50, useNativeDriver: true }),
-      ]).start();
-      
-      setTimeout(() => setHitEffect(false), 300);
-    } else {
-      setCombo(c => c + 1);
-      if (combo >= 2) {
-        playPerfect();
-      } else {
-        playSuccess();
-      }
-      
-      if (state.settings.animations) {
-        setBurst(true);
-        setTimeout(() => setBurst(false), 400);
-      }
+  // Speed up as distance increases
+  useEffect(() => {
+    if (step === 'play' && distance > 0 && distance % 20 === 0) {
+      if (gameLoopRef.current) clearInterval(gameLoopRef.current);
+      const newSpeed = Math.max(15, speed - 3);
+      setSpeed(newSpeed);
+      gameLoopRef.current = setInterval(gameLoop, newSpeed);
     }
+  }, [distance, step, speed, gameLoop]);
 
-    setPos(nextPos);
-    if (nextPos >= 100) finish();
-  };
-
-  const finish = () => {
+  const handleDone = () => {
     const seconds = startedAt ? Math.max(1, Math.round((Date.now() - startedAt) / 1000)) : 1;
-    const accuracy = Math.max(0, 1 - mistakes / 8);
-    const score = Math.round(55 + accuracy * 45);
-    playPerfect();
-    onDone({ completed: true, score, mistakes, seconds });
-    setStep('done');
+    const won = distance >= TOTAL_DISTANCE;
+    const finalScore = Math.round((won ? 70 : 40) + (lives / 3) * 30);
+    onDone({ completed: won, score: finalScore, mistakes: 3 - lives, seconds });
   };
 
-  const laneLabel = lane === 0 ? 'Topo' : lane === 1 ? 'Meio' : 'Fundo';
+  const instruction = 'Pilote a baleia pelo mar tempestuoso! Desvie das tempestades, rochas e redemoinhos para levar Jonas em segurança até a praia.';
 
   if (step === 'intro') {
     return (
       <View style={{ gap: theme.spacing(2) }}>
         <Card style={{ gap: 16, alignItems: 'center' }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-            <Text style={{ fontSize: 48 }}>🐋</Text>
-            <Text style={{ fontSize: 28 }}>💨</Text>
-            <Text style={{ fontSize: 40 }}>👨</Text>
+            <Text style={{ fontSize: 24 }}>⛈️🪨🌀</Text>
+            <Text style={{ fontSize: 50 }}>🐋</Text>
+            <Text style={{ fontSize: 24 }}>🏖️</Text>
           </View>
-          <Text style={{ ...theme.typography.title, textAlign: 'center' }}>Jonas e o Grande Peixe</Text>
+          <Text style={{ ...theme.typography.title, textAlign: 'center' }}>Jonas no Mar</Text>
           <Text style={{ ...theme.typography.body, color: theme.colors.muted, textAlign: 'center' }}>
             {instruction}
           </Text>
           <SpeakButton text={instruction} enabled={narrationEnabled} label="Ouvir instruções" />
-          <View style={{ flexDirection: 'row', gap: 12, marginTop: 8 }}>
-            <Text style={{ fontSize: 24 }}>⬆️ Subir</Text>
-            <Text style={{ fontSize: 24 }}>🌿 Algas</Text>
-            <Text style={{ fontSize: 24 }}>⬇️ Descer</Text>
+          
+          <View style={{ backgroundColor: theme.colors.primary + '20', padding: 12, borderRadius: 12, width: '100%' }}>
+            <Text style={{ ...theme.typography.small, textAlign: 'center', fontWeight: '700' }}>
+              ❤️ 3 vidas • 🎯 Chegue à praia • ⬆️⬇️ Use as setas!
+            </Text>
           </View>
         </Card>
-        <PrimaryButton title="🐋 Iniciar Jornada!" onPress={start} />
+        <PrimaryButton title="🐋 Navegar!" onPress={start} />
       </View>
     );
   }
 
   if (step === 'done') {
+    const won = distance >= TOTAL_DISTANCE;
+    const rating = won && lives === 3 ? '🏆 PERFEITO!' : won ? '⭐ Chegou!' : '🌊 O mar venceu...';
+    
     return (
       <View style={{ gap: theme.spacing(2) }}>
         <Card style={{ gap: 16, alignItems: 'center', position: 'relative', overflow: 'hidden' }}>
-          <ConfettiBurst show={state.settings.animations} />
-          <Text style={{ fontSize: 64 }}>🏖️</Text>
-          <Text style={{ ...theme.typography.title, color: theme.colors.ok }}>Jonas Salvo!</Text>
-          <Text style={{ ...theme.typography.body, color: theme.colors.muted, textAlign: 'center' }}>
-            O peixe levou Jonas em segurança até a praia!
-          </Text>
+          <ConfettiBurst show={state.settings.animations && won} />
+          <Text style={{ fontSize: 56 }}>{won ? '🏖️' : '🌊'}</Text>
+          <Text style={{ ...theme.typography.title, color: won ? theme.colors.ok : theme.colors.warn }}>{rating}</Text>
+          
+          <View style={{ backgroundColor: theme.colors.stroke, padding: 16, borderRadius: 16, width: '100%', gap: 10 }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+              <Text style={{ fontWeight: '700' }}>💎 Pontuação:</Text>
+              <Text style={{ fontWeight: '900', color: theme.colors.primary, fontSize: 18 }}>{score}</Text>
+            </View>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+              <Text style={{ fontWeight: '700' }}>📍 Distância:</Text>
+              <Text style={{ fontWeight: '800', color: theme.colors.ok }}>{distance}%</Text>
+            </View>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+              <Text style={{ fontWeight: '700' }}>❤️ Vidas restantes:</Text>
+              <Text style={{ fontWeight: '800', color: lives > 0 ? theme.colors.ok : theme.colors.bad }}>{lives}/3</Text>
+            </View>
+          </View>
         </Card>
+        <PrimaryButton title="✓ Continuar" onPress={handleDone} variant="success" />
       </View>
     );
   }
 
-  const progressWidth = progressAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['0%', '100%'],
-  });
-
   return (
     <View style={{ gap: theme.spacing(1.5) }}>
-      {/* Barra de Progresso */}
-      <View style={{ height: 16, backgroundColor: theme.colors.stroke, borderRadius: 8, overflow: 'hidden' }}>
-        <Animated.View style={{ 
-          height: '100%', 
-          backgroundColor: theme.colors.ok,
-          borderRadius: 8,
-          width: progressWidth,
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'flex-end',
-          paddingRight: 4,
-        }}>
-          <Text style={{ fontSize: 12 }}>🐋</Text>
-        </Animated.View>
-        <View style={{ position: 'absolute', right: 8, top: 0, bottom: 0, justifyContent: 'center' }}>
+      {/* Header */}
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+        <View style={{ flexDirection: 'row', gap: 4 }}>
+          {[...Array(3)].map((_, i) => (
+            <Text key={i} style={{ fontSize: 20, opacity: i < lives ? 1 : 0.3 }}>❤️</Text>
+          ))}
+        </View>
+        <View style={{ backgroundColor: theme.colors.primary, paddingHorizontal: 14, paddingVertical: 6, borderRadius: 16 }}>
+          <Text style={{ color: '#fff', fontWeight: '900', fontSize: 16 }}>💎 {score}</Text>
+        </View>
+      </View>
+
+      {/* Progress to beach */}
+      <View style={{ height: 16, backgroundColor: theme.colors.stroke, borderRadius: 8, overflow: 'hidden', flexDirection: 'row', alignItems: 'center' }}>
+        <View style={{ height: '100%', backgroundColor: '#4169E1', width: `${distance}%`, borderRadius: 8 }} />
+        <View style={{ position: 'absolute', left: `${Math.min(distance, 95)}%` }}>
+          <Text style={{ fontSize: 14 }}>🐋</Text>
+        </View>
+        <View style={{ position: 'absolute', right: 4 }}>
           <Text style={{ fontSize: 14 }}>🏖️</Text>
         </View>
       </View>
 
-      {/* Status */}
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Text style={{ ...theme.typography.subtitle }}>
-          📍 {pos}% • Pista: {laneLabel}
-        </Text>
-        {combo >= 3 && (
-          <View style={{ backgroundColor: theme.colors.primary, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 }}>
-            <Text style={{ color: '#fff', fontWeight: '800', fontSize: 12 }}>🔥 Combo x{combo}!</Text>
-          </View>
-        )}
-      </View>
-
-      {/* Oceano com 3 Pistas */}
+      {/* Game Area */}
       <Animated.View style={{ transform: [{ translateX: shakeAnim }] }}>
-        <LinearGradient
-          colors={['#0077B6', '#00B4D8', '#48CAE4'] as const}
+        <LinearGradient 
+          colors={['#0077B6', '#00B4D8', '#48CAE4'] as const} 
           style={{ 
-            borderRadius: 20, 
+            width: GAME_WIDTH, 
+            height: GAME_HEIGHT, 
+            borderRadius: 16, 
             overflow: 'hidden',
+            alignSelf: 'center',
           }}
         >
-          {[0, 1, 2].map(l => {
-            const thisLane = l as Lane;
-            const hasObstacleAhead = obstacles.some(o => o.at === pos + 10 && o.lane === thisLane);
-            const isFish = lane === thisLane;
-            const hasJonas = pos >= 90 && isFish;
-            
-            return (
-              <View
-                key={l}
-                style={{
-                  height: laneHeight,
-                  borderBottomWidth: l < 2 ? 2 : 0,
-                  borderBottomColor: 'rgba(255,255,255,0.3)',
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  paddingHorizontal: 16,
-                  justifyContent: 'space-between',
-                  backgroundColor: isFish ? 'rgba(255,255,255,0.15)' : 'transparent',
-                }}
-              >
-                {/* Peixe/Jonas */}
-                <View style={{ width: 60 }}>
-                  {isFish && (
-                    <Animated.Text style={{ 
-                      fontSize: 40, 
-                      transform: [{ scale: fishAnim }],
-                    }}>
-                      {hasJonas ? '🐋👨' : '🐋'}
-                    </Animated.Text>
-                  )}
-                </View>
+          {/* Wave effect background */}
+          <View style={{ position: 'absolute', width: '100%', height: '100%', opacity: 0.3 }}>
+            {[...Array(5)].map((_, i) => (
+              <View key={i} style={{ 
+                position: 'absolute', 
+                top: i * 60, 
+                left: 0, 
+                right: 0, 
+                height: 2, 
+                backgroundColor: '#fff' 
+              }} />
+            ))}
+          </View>
 
-                {/* Nome da pista */}
-                <Text style={{ 
-                  color: '#fff', 
-                  fontWeight: '800', 
-                  fontSize: 14,
-                  textShadowColor: 'rgba(0,0,0,0.3)',
-                  textShadowOffset: { width: 1, height: 1 },
-                  textShadowRadius: 2,
-                }}>
-                  {l === 0 ? '🔝 Topo' : l === 1 ? '➡️ Meio' : '⬇️ Fundo'}
-                </Text>
+          {/* Obstacles */}
+          {obstacles.map(obs => (
+            <View key={obs.id} style={{
+              position: 'absolute',
+              left: obs.x,
+              top: obs.y,
+              width: OBSTACLE_SIZE,
+              height: OBSTACLE_SIZE,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+              <Text style={{ fontSize: OBSTACLE_SIZE * 0.8 }}>{obs.emoji}</Text>
+            </View>
+          ))}
 
-                {/* Obstáculo */}
-                <View style={{ width: 60, alignItems: 'flex-end' }}>
-                  {hasObstacleAhead && (
-                    <Text style={{ fontSize: 36 }}>🌿</Text>
-                  )}
-                </View>
-              </View>
-            );
-          })}
+          {/* Whale */}
+          <Animated.View style={{
+            position: 'absolute',
+            left: 30,
+            top: whaleY - WHALE_SIZE / 2,
+            width: WHALE_SIZE,
+            height: WHALE_SIZE,
+            transform: [{ scale: whaleAnim }],
+            opacity: isHit ? 0.5 : 1,
+          }}>
+            <Text style={{ fontSize: WHALE_SIZE * 0.9 }}>🐋</Text>
+          </Animated.View>
         </LinearGradient>
       </Animated.View>
 
-      {/* Efeito de Colisão */}
-      {hitEffect && (
-        <Card style={{ 
-          backgroundColor: theme.colors.bad + '20', 
-          borderColor: theme.colors.bad,
-          padding: 10,
-        }}>
-          <Text style={{ ...theme.typography.small, color: theme.colors.bad, textAlign: 'center', fontWeight: '700' }}>
-            💥 Bateu nas algas! Erros: {mistakes}
-          </Text>
-        </Card>
-      )}
-
-      {/* Controles */}
-      <View style={{ flexDirection: 'row', gap: 10 }}>
-        <Pressable 
-          onPress={() => move(-1)} 
-          style={{ 
-            flex: 1, 
-            backgroundColor: lane === 0 ? theme.colors.stroke : theme.colors.primary,
-            borderRadius: 16,
-            paddingVertical: 16,
-            alignItems: 'center',
-            opacity: lane === 0 ? 0.5 : 1,
-          }}
-        >
-          <Text style={{ fontSize: 28 }}>⬆️</Text>
-          <Text style={{ color: '#fff', fontWeight: '800', fontSize: 12 }}>SUBIR</Text>
+      {/* Controls */}
+      <View style={{ flexDirection: 'row', gap: 12, justifyContent: 'center' }}>
+        <Pressable onPress={() => moveWhale('up')} style={{ flex: 1 }}>
+          <LinearGradient colors={['#4CAF50', '#388E3C'] as const} style={{
+            borderRadius: 16, paddingVertical: 20, alignItems: 'center',
+          }}>
+            <Text style={{ fontSize: 32 }}>⬆️</Text>
+            <Text style={{ color: '#fff', fontWeight: '800', fontSize: 12 }}>SUBIR</Text>
+          </LinearGradient>
         </Pressable>
-
-        <Pressable 
-          onPress={tick} 
-          style={{ 
-            flex: 1.5, 
-            backgroundColor: theme.colors.ok,
-            borderRadius: 16,
-            paddingVertical: 16,
-            alignItems: 'center',
-          }}
-        >
-          <Text style={{ fontSize: 28 }}>➡️</Text>
-          <Text style={{ color: '#fff', fontWeight: '800', fontSize: 12 }}>NADAR</Text>
-        </Pressable>
-
-        <Pressable 
-          onPress={() => move(1)} 
-          style={{ 
-            flex: 1, 
-            backgroundColor: lane === 2 ? theme.colors.stroke : theme.colors.primary,
-            borderRadius: 16,
-            paddingVertical: 16,
-            alignItems: 'center',
-            opacity: lane === 2 ? 0.5 : 1,
-          }}
-        >
-          <Text style={{ fontSize: 28 }}>⬇️</Text>
-          <Text style={{ color: '#fff', fontWeight: '800', fontSize: 12 }}>DESCER</Text>
+        
+        <Pressable onPress={() => moveWhale('down')} style={{ flex: 1 }}>
+          <LinearGradient colors={['#FF9800', '#F57C00'] as const} style={{
+            borderRadius: 16, paddingVertical: 20, alignItems: 'center',
+          }}>
+            <Text style={{ fontSize: 32 }}>⬇️</Text>
+            <Text style={{ color: '#fff', fontWeight: '800', fontSize: 12 }}>DESCER</Text>
+          </LinearGradient>
         </Pressable>
       </View>
 
-      {/* Dica */}
       <Text style={{ ...theme.typography.small, color: theme.colors.muted, textAlign: 'center' }}>
-        💡 Veja as algas 🌿 e mude de pista antes de nadar!
+        💡 Desvie dos obstáculos! A velocidade aumenta!
       </Text>
 
       <ConfettiBurst show={burst && state.settings.animations} />
