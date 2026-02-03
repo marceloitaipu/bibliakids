@@ -123,6 +123,10 @@ export default function NoePairsGame({
         <Text style={{ ...theme.typography.small, color: theme.colors.muted }}>
           Toque nos animais para colocar em duplas na arca.
         </Text>
+        {allDone && (
+          <PrimaryButton title="🎉 Continuar para as perguntas!" onPress={finish} variant="success" />
+        )}
+        </Text>
       </Card>
 
       <Card style={{ gap: 12 }}>
