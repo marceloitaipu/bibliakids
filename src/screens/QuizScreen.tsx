@@ -70,7 +70,9 @@ export default function QuizScreen({ route, navigation }: Props) {
       const doneCorrect = correct + lastOk;
 
       const ratio = doneCorrect / total;
-      const stars = ratio >= 0.9 ? 3 : ratio >= 0.6 ? 2 : ratio >= 0.3 ? 1 : 0;
+      // Garantir pelo menos 1 estrela para desbloquear próxima fase
+      const stars = ratio >= 0.9 ? 3 : ratio >= 0.6 ? 2 : 1;
+      console.log('QuizScreen: Finalizando quiz -', { levelId: level.id, doneCorrect, total, ratio, stars });
       navigation.replace('Reward', { levelId: level.id, stars, newStickerId: level.stickerId });
       return;
     }
