@@ -55,18 +55,21 @@ function reducer(state: State, action: Action): State {
       return { ...state, avatar: action.avatar };
 
     case 'SET_STARS': {
+      console.log('Reducer SET_STARS:', action);
       const prev = state.progress.starsByLevel[action.levelId] ?? 0;
       const best = Math.max(prev, action.stars);
       const stickers = { ...state.progress.stickers };
       if (action.stickerId) stickers[action.stickerId] = true;
 
-      return {
+      const newState = {
         ...state,
         progress: {
           starsByLevel: { ...state.progress.starsByLevel, [action.levelId]: best },
           stickers,
         },
       };
+      console.log('Novo starsByLevel:', newState.progress.starsByLevel);
+      return newState;
     }
 
     case 'SET_SETTING':
@@ -100,8 +103,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const loadState = async () => {
       try {
         const stored = await AsyncStorage.getItem(STORAGE_KEY);
+        console.log('Carregando estado do AsyncStorage:', stored);
         if (stored) {
           const parsed = JSON.parse(stored);
+          console.log('Estado carregado - starsByLevel:', parsed.progress?.starsByLevel);
           dispatch({ type: 'HYDRATE', state: parsed });
         }
       } catch (e) {
@@ -118,7 +123,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (loaded) {
       const saveState = async () => {
         try {
+          console.log('Salvando estado no AsyncStorage:', state.progress.starsByLevel);
           await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+          console.log('Estado salvo com sucesso!');
         } catch (e) {
           console.warn('Failed to save state:', e);
         }
@@ -148,7 +155,10 @@ export function isLevelUnlocked(levelId: string, starsByLevel: Record<string, nu
   if (idx <= 0) return true;
   const prevId = levels.levels[idx - 1]?.id;
   if (!prevId) return true;
-  return (starsByLevel[prevId] ?? 0) > 0;
+  const prevStars = starsByLevel[prevId] ?? 0;
+  const unlocked = prevStars > 0;
+  console.log(`isLevelUnlocked(${levelId}): prevId=${prevId}, prevStars=${prevStars}, unlocked=${unlocked}`);
+  return unlocked;
 }
 
 export function shuffle<T>(arr: T[]): T[] {
