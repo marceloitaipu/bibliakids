@@ -186,7 +186,15 @@ export default function NoePairsGame({
         </View>
       </Card>
 
-      <PrimaryButton title={allDone ? 'Continuar' : 'Complete as duplas'} onPress={finish} disabled={!allDone} />
+      {allDone ? (
+        <PrimaryButton title="Continuar ✓" onPress={finish} variant="success" />
+      ) : (
+        <Card style={{ backgroundColor: theme.colors.warning + '20', padding: 12 }}>
+          <Text style={{ ...theme.typography.small, color: theme.colors.warning, textAlign: 'center' }}>
+            ⚠️ Complete todas as {totalPairs} duplas primeiro!
+          </Text>
+        </Card>
+      )}
     </View>
   );
 }

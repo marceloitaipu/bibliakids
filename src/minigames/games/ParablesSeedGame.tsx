@@ -117,7 +117,15 @@ export default function ParablesSeedGame({
         <Text style={{ ...theme.typography.small, color: theme.colors.muted }}>Veja as sementes crescendo!</Text>
       </Card>
 
-      <PrimaryButton title="Finalizar" onPress={finish} disabled={seedsLeft > 0} />
+      {seedsLeft <= 0 ? (
+        <PrimaryButton title="Continuar ✓" onPress={finish} variant="success" />
+      ) : (
+        <Card style={{ backgroundColor: theme.colors.warning + '20', padding: 12 }}>
+          <Text style={{ ...theme.typography.small, color: theme.colors.warning, textAlign: 'center' }}>
+            ⚠️ Plante todas as {seedsLeft} sementes restantes!
+          </Text>
+        </Card>
+      )}
     </View>
   );
 }
