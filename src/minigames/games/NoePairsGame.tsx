@@ -126,7 +126,6 @@ export default function NoePairsGame({
         {allDone && (
           <PrimaryButton title="🎉 Continuar para as perguntas!" onPress={finish} variant="success" />
         )}
-        </Text>
       </Card>
 
       <Card style={{ gap: 12 }}>
