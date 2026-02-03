@@ -15,6 +15,7 @@ import QuizScreen from './src/screens/QuizScreen';
 import RewardScreen from './src/screens/RewardScreen';
 import AlbumScreen from './src/screens/AlbumScreen';
 import ParentScreen from './src/screens/ParentScreen';
+import DevTestScreen from './src/screens/DevTestScreen';
 
 export type RootStackParamList = {
   Avatar: undefined;
@@ -25,6 +26,7 @@ export type RootStackParamList = {
   Reward: { levelId: string; stars: number; newStickerId?: string };
   Album: undefined;
   Parents: undefined;
+  DevTest: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -35,7 +37,7 @@ export default function App() {
       <NavigationContainer>
         <StatusBar style="dark" />
         <Stack.Navigator
-          initialRouteName="Map"
+          initialRouteName="DevTest"
           screenOptions={{
             headerStyle: { backgroundColor: theme.colors.bg },
             headerShadowVisible: false,
@@ -43,6 +45,7 @@ export default function App() {
             contentStyle: { backgroundColor: theme.colors.bg },
           }}
         >
+          <Stack.Screen name="DevTest" component={DevTestScreen} options={{ title: '🧪 Modo Teste' }} />
           <Stack.Screen name="Map" component={MapScreen} options={{ title: 'Mapa de Aventuras' }} />
           <Stack.Screen name="Story" component={StoryScreen} options={{ title: 'História' }} />
           <Stack.Screen name="MiniGame" component={MiniGameScreen} options={{ title: 'Mini-jogo' }} />
