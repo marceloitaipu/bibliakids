@@ -23,7 +23,7 @@ const ITEMS: Item[] = [
   { id: 'moon', emoji: '🌙', name: 'Lua', zone: 'ceu' },
   { id: 'bird', emoji: '🐦', name: 'Pássaro', zone: 'ceu' },
   { id: 'fish', emoji: '🐟', name: 'Peixe', zone: 'mar' },
-  { id: 'turtle', emoji: '🐢', name: 'Tartaruga', zone: 'mar' },
+  { id: 'turtle', emoji: '🐢', name: 'Tartaruga Marinha', zone: 'mar' },
   { id: 'crab', emoji: '🦀', name: 'Caranguejo', zone: 'mar' },
   { id: 'tree', emoji: '🌳', name: 'Árvore', zone: 'terra' },
   { id: 'flower', emoji: '🌸', name: 'Flor', zone: 'terra' },
