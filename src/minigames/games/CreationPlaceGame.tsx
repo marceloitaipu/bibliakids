@@ -50,13 +50,14 @@ export default function CreationPlaceGame({
   const { playTap, playFail, playSuccess } = useSfx(state.settings.sound);
 
   const pool = useMemo(() => pickN(ITEMS, 6), []);
-  const [step, setStep] = useState<'intro' | 'play'>('intro');
+  const [step, setStep] = useState<'intro' | 'play' | 'done'>('intro');
   const [selected, setSelected] = useState<string | null>(null);
   const [placed, setPlaced] = useState<Record<string, ZoneId>>({});
   const [mistakes, setMistakes] = useState(0);
   const [touches, setTouches] = useState(0);
   const [startedAt, setStartedAt] = useState<number | null>(null);
   const [burst, setBurst] = useState(false);
+  const [gameResult, setGameResult] = useState<MiniGameResult | null>(null);
 
   const instruction =
     'Monte o mundo! Primeiro toque em um item, depois toque no lugar certo: Céu, Mar ou Terra.';
@@ -85,14 +86,19 @@ export default function CreationPlaceGame({
 
   const allPlaced = pool.every((it) => placed[it.id]);
   const done = () => {
+    console.log('CreationPlaceGame: Finalizando jogo');
     const seconds = startedAt ? Math.max(1, Math.round((Date.now() - startedAt) / 1000)) : 1;
     const accuracy = touches > 0 ? Math.max(0, 1 - mistakes / touches) : 1;
     const score = Math.round(55 + accuracy * 45);
+    const result = { completed: true, score, mistakes, seconds };
+    console.log('CreationPlaceGame: Resultado -', result);
+    setGameResult(result);
+    setStep('done');
     if (state.settings.animations) {
       setBurst(true);
       setTimeout(() => setBurst(false), 800);
     }
-    onDone({ completed: true, score, mistakes, seconds });
+    onDone(result);
   };
 
   const allText = `${instruction} Itens para colocar: ${pool.map((p) => p.name).join(', ')}.`;
@@ -106,6 +112,23 @@ export default function CreationPlaceGame({
           <Text style={{ ...theme.typography.body, color: theme.colors.muted }}>{instruction}</Text>
         </Card>
         <PrimaryButton title="Começar" onPress={start} />
+      </View>
+    );
+  }
+
+  if (step === 'done') {
+    return (
+      <View style={{ gap: theme.spacing(2) }}>
+        <Card style={{ gap: 10, position: 'relative', overflow: 'hidden' }}>
+          <ConfettiBurst show={burst && state.settings.animations} />
+          <Text style={theme.typography.title}>🎉 Parabéns!</Text>
+          <Text style={theme.typography.body}>Você montou o mundo corretamente!</Text>
+          {gameResult && (
+            <Text style={{ ...theme.typography.small, color: theme.colors.muted }}>
+              Pontos: {gameResult.score} • Erros: {gameResult.mistakes} • Tempo: {gameResult.seconds}s
+            </Text>
+          )}
+        </Card>
       </View>
     );
   }

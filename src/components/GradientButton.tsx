@@ -18,7 +18,7 @@ export default function GradientButton({
   style?: ViewStyle;
   icon?: string;
 }) {
-  const colors = 
+  const colors: readonly [string, string] = 
     variant === 'accent' ? ['#5FD4C8', '#2EC4B6'] :
     variant === 'success' ? ['#5FD99A', '#2FBF71'] :
     ['#FFB703', '#FF7A00']; // primary
