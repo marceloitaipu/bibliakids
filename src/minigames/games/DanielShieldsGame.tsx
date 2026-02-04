@@ -252,6 +252,24 @@ export default function DanielShieldsGame({
 
   const dirEmoji: Record<Direction, string> = { up: '⬆️', down: '⬇️', left: '⬅️', right: '➡️' };
 
+  const handleTouch = (e: any) => {
+    if (!canTap) return;
+    const { locationX, locationY } = e.nativeEvent;
+    const centerX = 150; // Approximate center
+    const centerY = 100;
+    const dx = locationX - centerX;
+    const dy = locationY - centerY;
+    
+    // Determine which direction based on touch position
+    let dir: Direction;
+    if (Math.abs(dx) > Math.abs(dy)) {
+      dir = dx > 0 ? 'right' : 'left';
+    } else {
+      dir = dy > 0 ? 'down' : 'up';
+    }
+    tapDirection(dir);
+  };
+
   return (
     <View style={{ gap: theme.spacing(1.5) }}>
       {/* Header */}
@@ -276,11 +294,12 @@ export default function DanielShieldsGame({
         <View style={{ height: '100%', backgroundColor: theme.colors.ok, width: `${(round / TOTAL_ROUNDS) * 100}%` }} />
       </View>
 
-      {/* Arena */}
+      {/* Arena - Toque na direção do leão */}
       <Animated.View style={{ transform: [{ translateX: shakeAnim }] }}>
-        <LinearGradient colors={['#2C1810', '#4A3728'] as const} style={{ 
-          borderRadius: 20, padding: 16, alignItems: 'center', minHeight: 200,
-        }}>
+        <Pressable onPress={handleTouch}>
+          <LinearGradient colors={['#2C1810', '#4A3728'] as const} style={{ 
+            borderRadius: 20, padding: 16, alignItems: 'center', minHeight: 200,
+          }}>
           {/* Lions from each direction */}
           <View style={{ position: 'absolute', top: 10, left: '50%', marginLeft: -20 }}>
             <Animated.Text style={{ 
@@ -328,52 +347,27 @@ export default function DanielShieldsGame({
               </Text>
             </View>
           )}
-        </LinearGradient>
+
+          {/* Touch zone hints */}
+          <View style={{ position: 'absolute', top: 5, alignItems: 'center', opacity: 0.4 }}>
+            <Text style={{ color: '#fff', fontSize: 10 }}>⬆️ CIMA</Text>
+          </View>
+          <View style={{ position: 'absolute', bottom: 5, alignItems: 'center', opacity: 0.4 }}>
+            <Text style={{ color: '#fff', fontSize: 10 }}>⬇️ BAIXO</Text>
+          </View>
+          <View style={{ position: 'absolute', left: 5, top: '50%', opacity: 0.4 }}>
+            <Text style={{ color: '#fff', fontSize: 10 }}>⬅️</Text>
+          </View>
+          <View style={{ position: 'absolute', right: 5, top: '50%', opacity: 0.4 }}>
+            <Text style={{ color: '#fff', fontSize: 10 }}>➡️</Text>
+          </View>
+          </LinearGradient>
+        </Pressable>
       </Animated.View>
 
-      {/* Direction Buttons */}
-      <View style={{ gap: 8 }}>
-        {/* Up */}
-        <View style={{ alignItems: 'center' }}>
-          <Pressable onPress={() => tapDirection('up')} disabled={!canTap} style={{ opacity: canTap ? 1 : 0.5 }}>
-            <LinearGradient colors={['#4CAF50', '#388E3C'] as const} style={{
-              width: 70, height: 50, borderRadius: 12, alignItems: 'center', justifyContent: 'center',
-            }}>
-              <Text style={{ fontSize: 28 }}>⬆️</Text>
-            </LinearGradient>
-          </Pressable>
-        </View>
-        
-        {/* Left + Right */}
-        <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
-          <Pressable onPress={() => tapDirection('left')} disabled={!canTap} style={{ opacity: canTap ? 1 : 0.5 }}>
-            <LinearGradient colors={['#2196F3', '#1976D2'] as const} style={{
-              width: 70, height: 50, borderRadius: 12, alignItems: 'center', justifyContent: 'center',
-            }}>
-              <Text style={{ fontSize: 28 }}>⬅️</Text>
-            </LinearGradient>
-          </Pressable>
-          
-          <Pressable onPress={() => tapDirection('right')} disabled={!canTap} style={{ opacity: canTap ? 1 : 0.5 }}>
-            <LinearGradient colors={['#9C27B0', '#7B1FA2'] as const} style={{
-              width: 70, height: 50, borderRadius: 12, alignItems: 'center', justifyContent: 'center',
-            }}>
-              <Text style={{ fontSize: 28 }}>➡️</Text>
-            </LinearGradient>
-          </Pressable>
-        </View>
-        
-        {/* Down */}
-        <View style={{ alignItems: 'center' }}>
-          <Pressable onPress={() => tapDirection('down')} disabled={!canTap} style={{ opacity: canTap ? 1 : 0.5 }}>
-            <LinearGradient colors={['#FF9800', '#F57C00'] as const} style={{
-              width: 70, height: 50, borderRadius: 12, alignItems: 'center', justifyContent: 'center',
-            }}>
-              <Text style={{ fontSize: 28 }}>⬇️</Text>
-            </LinearGradient>
-          </Pressable>
-        </View>
-      </View>
+      <Text style={{ ...theme.typography.small, color: theme.colors.muted, textAlign: 'center' }}>
+        👆 Toque na direção do leão para bloquear!
+      </Text>
 
       <ConfettiBurst show={burst && state.settings.animations} />
     </View>

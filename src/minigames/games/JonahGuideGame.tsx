@@ -17,7 +17,7 @@ const GAME_WIDTH = Math.min(width - 40, 350);
 const GAME_HEIGHT = 300;
 const WHALE_SIZE = 50;
 const OBSTACLE_SIZE = 40;
-const TOTAL_DISTANCE = 100;
+const TOTAL_DISTANCE = 200; // Jogo mais longo
 
 type Obstacle = {
   id: number;
@@ -52,7 +52,7 @@ export default function JonahGuideGame({
   const [startedAt, setStartedAt] = useState<number | null>(null);
   const [burst, setBurst] = useState(false);
   const [isHit, setIsHit] = useState(false);
-  const [speed, setSpeed] = useState(30); // ms per game tick
+  const [speed, setSpeed] = useState(120); // ms per game tick (mais lento = mais fácil)
 
   const gameLoopRef = useRef<NodeJS.Timeout | null>(null);
   const obstacleIdRef = useRef(0);
@@ -96,7 +96,7 @@ export default function JonahGuideGame({
 
   const gameLoop = useCallback(() => {
     setDistance(d => {
-      const newDist = d + 1;
+      const newDist = d + 0.5; // Progresso mais lento
       if (newDist >= TOTAL_DISTANCE) {
         finish(true);
       }
@@ -105,10 +105,10 @@ export default function JonahGuideGame({
 
     // Move obstacles left
     setObstacles(obs => {
-      const moved = obs.map(o => ({ ...o, x: o.x - 8 })).filter(o => o.x > -OBSTACLE_SIZE);
+      const moved = obs.map(o => ({ ...o, x: o.x - 3 })).filter(o => o.x > -OBSTACLE_SIZE);
       
-      // Spawn new obstacles
-      if (Math.random() < 0.15) {
+      // Spawn new obstacles (menos frequente)
+      if (Math.random() < 0.08) {
         const type = OBSTACLE_TYPES[Math.floor(Math.random() * OBSTACLE_TYPES.length)];
         moved.push({
           id: obstacleIdRef.current++,
@@ -210,7 +210,7 @@ export default function JonahGuideGame({
           
           <View style={{ backgroundColor: theme.colors.primary + '20', padding: 12, borderRadius: 12, width: '100%' }}>
             <Text style={{ ...theme.typography.small, textAlign: 'center', fontWeight: '700' }}>
-              ❤️ 3 vidas • 🎯 Chegue à praia • ⬆️⬇️ Use as setas!
+              ❤️ 3 vidas • 🎯 Chegue à praia • 👆 Toque para mover!
             </Text>
           </View>
         </Card>
@@ -275,18 +275,28 @@ export default function JonahGuideGame({
         </View>
       </View>
 
-      {/* Game Area */}
+      {/* Game Area - Toque para mover */}
       <Animated.View style={{ transform: [{ translateX: shakeAnim }] }}>
-        <LinearGradient 
-          colors={['#0077B6', '#00B4D8', '#48CAE4'] as const} 
-          style={{ 
-            width: GAME_WIDTH, 
-            height: GAME_HEIGHT, 
-            borderRadius: 16, 
-            overflow: 'hidden',
-            alignSelf: 'center',
+        <Pressable 
+          onPress={(e) => {
+            const touchY = e.nativeEvent.locationY;
+            if (touchY < GAME_HEIGHT / 2) {
+              moveWhale('up');
+            } else {
+              moveWhale('down');
+            }
           }}
+          style={{ alignSelf: 'center' }}
         >
+          <LinearGradient 
+            colors={['#0077B6', '#00B4D8', '#48CAE4'] as const} 
+            style={{ 
+              width: GAME_WIDTH, 
+              height: GAME_HEIGHT, 
+              borderRadius: 16, 
+              overflow: 'hidden',
+            }}
+          >
           {/* Wave effect background */}
           <View style={{ position: 'absolute', width: '100%', height: '100%', opacity: 0.3 }}>
             {[...Array(5)].map((_, i) => (
@@ -328,32 +338,20 @@ export default function JonahGuideGame({
           }}>
             <Text style={{ fontSize: WHALE_SIZE * 0.9 }}>🐋</Text>
           </Animated.View>
-        </LinearGradient>
+
+          {/* Touch zone indicators */}
+          <View style={{ position: 'absolute', top: 10, left: 0, right: 0, alignItems: 'center', opacity: 0.5 }}>
+            <Text style={{ color: '#fff', fontSize: 16 }}>⬆️ Toque aqui para SUBIR</Text>
+          </View>
+          <View style={{ position: 'absolute', bottom: 10, left: 0, right: 0, alignItems: 'center', opacity: 0.5 }}>
+            <Text style={{ color: '#fff', fontSize: 16 }}>⬇️ Toque aqui para DESCER</Text>
+          </View>
+          </LinearGradient>
+        </Pressable>
       </Animated.View>
 
-      {/* Controls */}
-      <View style={{ flexDirection: 'row', gap: 12, justifyContent: 'center' }}>
-        <Pressable onPress={() => moveWhale('up')} style={{ flex: 1 }}>
-          <LinearGradient colors={['#4CAF50', '#388E3C'] as const} style={{
-            borderRadius: 16, paddingVertical: 20, alignItems: 'center',
-          }}>
-            <Text style={{ fontSize: 32 }}>⬆️</Text>
-            <Text style={{ color: '#fff', fontWeight: '800', fontSize: 12 }}>SUBIR</Text>
-          </LinearGradient>
-        </Pressable>
-        
-        <Pressable onPress={() => moveWhale('down')} style={{ flex: 1 }}>
-          <LinearGradient colors={['#FF9800', '#F57C00'] as const} style={{
-            borderRadius: 16, paddingVertical: 20, alignItems: 'center',
-          }}>
-            <Text style={{ fontSize: 32 }}>⬇️</Text>
-            <Text style={{ color: '#fff', fontWeight: '800', fontSize: 12 }}>DESCER</Text>
-          </LinearGradient>
-        </Pressable>
-      </View>
-
       <Text style={{ ...theme.typography.small, color: theme.colors.muted, textAlign: 'center' }}>
-        💡 Desvie dos obstáculos! A velocidade aumenta!
+        👆 Toque na parte de cima para subir, embaixo para descer!
       </Text>
 
       <ConfettiBurst show={burst && state.settings.animations} />

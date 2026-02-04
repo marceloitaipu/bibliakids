@@ -9,13 +9,13 @@ import type { RootStackParamList } from '../../App';
 type Props = NativeStackScreenProps<RootStackParamList, 'DevTest'>;
 
 const MINIGAMES = [
-  { id: 'criacao', title: '🌍 A Criação', game: 'creation_place', desc: 'Montar o Mundo' },
-  { id: 'noe', title: '🚢 Arca de Noé', game: 'noe_pairs', desc: 'Animais na Arca' },
-  { id: 'davi', title: '🏹 Davi e Golias', game: 'david_stone', desc: 'A Pedra da Coragem' },
-  { id: 'daniel', title: '🦁 Daniel', game: 'daniel_shields', desc: 'Proteger Daniel' },
-  { id: 'jonas', title: '🐋 Jonas', game: 'jonah_guide', desc: 'Guiar o Grande Peixe' },
-  { id: 'reis_magos', title: '⭐ Reis Magos', game: 'star_path', desc: 'Seguir a Estrela' },
-  { id: 'parabolas', title: '🌱 Parábolas', game: 'parables_seed', desc: 'Plantar no Solo Certo' },
+  { id: 'criacao', title: '🌍 A Criação', game: 'creation_place', desc: 'Quiz Relâmpago' },
+  { id: 'noe', title: '🚢 Arca de Noé', game: 'noe_pairs', desc: 'Jogo da Memória' },
+  { id: 'davi', title: '🏹 Davi e Golias', game: 'david_stone', desc: 'Mira no Alvo' },
+  { id: 'daniel', title: '🦁 Daniel', game: 'daniel_shields', desc: 'Reflexo Rápido' },
+  { id: 'jonas', title: '🐋 Jonas', game: 'jonah_guide', desc: 'Fuja das Tempestades' },
+  { id: 'jesus_nascimento', title: '⭐ Nascimento de Jesus', game: 'star_path', desc: 'Siga a Estrela' },
+  { id: 'parabolas', title: '🌱 Parábolas', game: 'parables_seed', desc: 'Semeador' },
 ];
 
 export default function DevTestScreen({ navigation }: Props) {

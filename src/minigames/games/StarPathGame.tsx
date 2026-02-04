@@ -243,6 +243,23 @@ export default function StarPathGame({
     right: '➡️',
   };
 
+  const handleTouch = (e: any) => {
+    if (step !== 'playing') return;
+    const { locationX, locationY } = e.nativeEvent;
+    const centerX = 150; // Approximate center of game area
+    const centerY = 90;
+    const dx = locationX - centerX;
+    const dy = locationY - centerY;
+    
+    let dir: Direction;
+    if (Math.abs(dx) > Math.abs(dy)) {
+      dir = dx > 0 ? 'right' : 'left';
+    } else {
+      dir = dy > 0 ? 'down' : 'up';
+    }
+    tapDirection(dir);
+  };
+
   return (
     <View style={{ gap: theme.spacing(1.5) }}>
       {/* Header */}
@@ -260,11 +277,12 @@ export default function StarPathGame({
         </View>
       </View>
 
-      {/* Star Display */}
+      {/* Star Display - Toque para responder */}
       <Animated.View style={{ transform: [{ translateX: shakeAnim }] }}>
-        <LinearGradient colors={['#1a1a2e', '#16213e'] as const} style={{ 
-          borderRadius: 20, padding: 24, alignItems: 'center', minHeight: 180,
-        }}>
+        <Pressable onPress={handleTouch} disabled={step !== 'playing'}>
+          <LinearGradient colors={['#1a1a2e', '#16213e'] as const} style={{ 
+            borderRadius: 20, padding: 24, alignItems: 'center', minHeight: 180,
+          }}>
           {/* Decorative stars */}
           {[...Array(8)].map((_, i) => (
             <View key={i} style={{ 
@@ -304,7 +322,26 @@ export default function StarPathGame({
           <View style={{ position: 'absolute', bottom: 5, right: 20 }}>
             <Text style={{ fontSize: 20 }}>👑👑👑</Text>
           </View>
-        </LinearGradient>
+
+          {/* Touch zone hints */}
+          {step === 'playing' && (
+            <>
+              <View style={{ position: 'absolute', top: 5, alignItems: 'center' }}>
+                <Text style={{ color: '#fff', fontSize: 14, opacity: 0.5 }}>⬆️</Text>
+              </View>
+              <View style={{ position: 'absolute', bottom: 25, alignItems: 'center' }}>
+                <Text style={{ color: '#fff', fontSize: 14, opacity: 0.5 }}>⬇️</Text>
+              </View>
+              <View style={{ position: 'absolute', left: 10, top: '45%' }}>
+                <Text style={{ color: '#fff', fontSize: 14, opacity: 0.5 }}>⬅️</Text>
+              </View>
+              <View style={{ position: 'absolute', right: 10, top: '45%' }}>
+                <Text style={{ color: '#fff', fontSize: 14, opacity: 0.5 }}>➡️</Text>
+              </View>
+            </>
+          )}
+          </LinearGradient>
+        </Pressable>
       </Animated.View>
 
       {/* Progress dots */}
@@ -317,85 +354,9 @@ export default function StarPathGame({
         ))}
       </View>
 
-      {/* Direction Buttons */}
-      <View style={{ gap: 8 }}>
-        {/* Up */}
-        <View style={{ alignItems: 'center' }}>
-          <Pressable 
-            onPress={() => tapDirection('up')} 
-            disabled={step !== 'playing'}
-            style={{ opacity: step === 'playing' ? 1 : 0.5 }}
-          >
-            <LinearGradient 
-              colors={dirColors.up} 
-              style={{
-                width: 80, height: 60, borderRadius: 14, alignItems: 'center', justifyContent: 'center',
-                opacity: highlightedDir === 'up' ? 1 : 0.7,
-                transform: [{ scale: highlightedDir === 'up' ? 1.1 : 1 }],
-              }}
-            >
-              <Text style={{ fontSize: 32 }}>⬆️</Text>
-            </LinearGradient>
-          </Pressable>
-        </View>
-        
-        {/* Left + Right */}
-        <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 60 }}>
-          <Pressable 
-            onPress={() => tapDirection('left')} 
-            disabled={step !== 'playing'}
-            style={{ opacity: step === 'playing' ? 1 : 0.5 }}
-          >
-            <LinearGradient 
-              colors={dirColors.left} 
-              style={{
-                width: 80, height: 60, borderRadius: 14, alignItems: 'center', justifyContent: 'center',
-                opacity: highlightedDir === 'left' ? 1 : 0.7,
-                transform: [{ scale: highlightedDir === 'left' ? 1.1 : 1 }],
-              }}
-            >
-              <Text style={{ fontSize: 32 }}>⬅️</Text>
-            </LinearGradient>
-          </Pressable>
-          
-          <Pressable 
-            onPress={() => tapDirection('right')} 
-            disabled={step !== 'playing'}
-            style={{ opacity: step === 'playing' ? 1 : 0.5 }}
-          >
-            <LinearGradient 
-              colors={dirColors.right} 
-              style={{
-                width: 80, height: 60, borderRadius: 14, alignItems: 'center', justifyContent: 'center',
-                opacity: highlightedDir === 'right' ? 1 : 0.7,
-                transform: [{ scale: highlightedDir === 'right' ? 1.1 : 1 }],
-              }}
-            >
-              <Text style={{ fontSize: 32 }}>➡️</Text>
-            </LinearGradient>
-          </Pressable>
-        </View>
-        
-        {/* Down */}
-        <View style={{ alignItems: 'center' }}>
-          <Pressable 
-            onPress={() => tapDirection('down')} 
-            disabled={step !== 'playing'}
-            style={{ opacity: step === 'playing' ? 1 : 0.5 }}
-          >
-            <LinearGradient 
-              colors={dirColors.down} 
-              style={{
-                width: 80, height: 60, borderRadius: 14, alignItems: 'center', justifyContent: 'center',
-                opacity: highlightedDir === 'down' ? 1 : 0.7,
-                transform: [{ scale: highlightedDir === 'down' ? 1.1 : 1 }],
-              }}
-            >
-              <Text style={{ fontSize: 32 }}>⬇️</Text>
-            </LinearGradient>
-          </Pressable>
-        </View>
-      </View>
+      <Text style={{ ...theme.typography.small, color: theme.colors.muted, textAlign: 'center' }}>
+        👆 Toque na direção: cima, baixo, esquerda ou direita!
+      </Text>
 
       <ConfettiBurst show={burst && state.settings.animations} />
     </View>
