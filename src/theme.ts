@@ -22,10 +22,10 @@ export const theme = {
     errorLight: '#FF7B7B',
   },
   gradients: {
-    primary: ['#FFB703', '#FF7A00'],
-    accent: ['#5FD4C8', '#2EC4B6'],
-    success: ['#5FD99A', '#2FBF71'],
-    card: ['#FFFFFF', '#FFF9F0'],
+    primary: ['#FFB703', '#FF7A00'] as const,
+    accent: ['#5FD4C8', '#2EC4B6'] as const,
+    success: ['#5FD99A', '#2FBF71'] as const,
+    card: ['#FFFFFF', '#FFF9F0'] as const,
   },
   radius: {
     xl: 24,

@@ -1,6 +1,27 @@
 # 📱 Guia de Build para Android e iOS
 
+## 🎯 Checklist Pré-Build
+
+Antes de gerar o build de produção, verifique:
+
+- [x] TypeScript sem erros: `npx tsc --noEmit`
+- [x] Testes passando: `npm test`
+- [x] Assets existem: icon.png, splash.png, adaptive-icon.png
+- [x] app.json configurado com bundleIdentifier/package corretos
+- [x] eas.json configurado
+- [x] Versão atualizada em app.json
+
 ## 🤖 Android
+
+### Scripts Disponíveis
+
+```bash
+# APK para testes internos
+build-preview.bat
+
+# App Bundle para Play Store
+build-production.bat
+```
 
 ### Opção 1: APK para Testes (Mais Simples)
 

@@ -35,7 +35,7 @@ export default function RewardScreen({ route, navigation }: Props) {
 
   const msg =
     stars === 3
-      ? 'Uau! Você mandou muito bem! �'
+      ? 'Uau! Você mandou muito bem! 🎉'
       : stars === 2
       ? 'Muito bom! Continue assim! 💪'
       : stars === 1

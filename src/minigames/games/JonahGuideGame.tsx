@@ -54,7 +54,7 @@ export default function JonahGuideGame({
   const [isHit, setIsHit] = useState(false);
   const [speed, setSpeed] = useState(120); // ms per game tick (mais lento = mais fácil)
 
-  const gameLoopRef = useRef<NodeJS.Timeout | null>(null);
+  const gameLoopRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const obstacleIdRef = useRef(0);
   const shakeAnim = useRef(new Animated.Value(0)).current;
   const whaleAnim = useRef(new Animated.Value(1)).current;

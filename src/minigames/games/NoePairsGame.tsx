@@ -66,7 +66,7 @@ export default function NoePairsGame({
   const [burst, setBurst] = useState(false);
   const [canFlip, setCanFlip] = useState(true);
 
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const flipAnims = useRef<Animated.Value[]>([]);
 
   const totalPairs = 8;

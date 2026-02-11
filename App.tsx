@@ -6,6 +6,7 @@ import { StatusBar } from 'expo-status-bar';
 
 import { theme } from './src/theme';
 import { AppProvider } from './src/state/AppState';
+import ErrorBoundary from './src/components/ErrorBoundary';
 
 import AvatarScreen from './src/screens/AvatarScreen';
 import MapScreen from './src/screens/MapScreen';
@@ -33,28 +34,34 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function App() {
   return (
-    <AppProvider>
-      <NavigationContainer>
-        <StatusBar style="dark" />
-        <Stack.Navigator
-          initialRouteName="DevTest"
-          screenOptions={{
-            headerStyle: { backgroundColor: theme.colors.bg },
-            headerShadowVisible: false,
-            headerTitleStyle: { fontSize: 18 },
-            contentStyle: { backgroundColor: theme.colors.bg },
-          }}
-        >
-          <Stack.Screen name="DevTest" component={DevTestScreen} options={{ title: '🧪 Modo Teste' }} />
-          <Stack.Screen name="Map" component={MapScreen} options={{ title: 'Mapa de Aventuras' }} />
-          <Stack.Screen name="Story" component={StoryScreen} options={{ title: 'História' }} />
-          <Stack.Screen name="MiniGame" component={MiniGameScreen} options={{ title: 'Mini-jogo' }} />
-          <Stack.Screen name="Quiz" component={QuizScreen} options={{ title: 'Perguntas' }} />
-          <Stack.Screen name="Reward" component={RewardScreen} options={{ title: 'Parabéns!' }} />
-          <Stack.Screen name="Album" component={AlbumScreen} options={{ title: 'Álbum de Adesivos' }} />
-          <Stack.Screen name="Parents" component={ParentScreen} options={{ title: 'Para Pais' }} />
-        </Stack.Navigator>
-      </NavigationContainer>
-    </AppProvider>
+    <ErrorBoundary
+      fallbackTitle="Ops! Algo deu errado"
+      fallbackMessage="O aplicativo encontrou um problema. Por favor, reinicie o app."
+    >
+      <AppProvider>
+        <NavigationContainer>
+          <StatusBar style="dark" />
+          <Stack.Navigator
+            initialRouteName="Avatar"
+            screenOptions={{
+              headerStyle: { backgroundColor: theme.colors.bg },
+              headerShadowVisible: false,
+              headerTitleStyle: { fontSize: 18 },
+              contentStyle: { backgroundColor: theme.colors.bg },
+            }}
+          >
+            <Stack.Screen name="Avatar" component={AvatarScreen} options={{ title: 'Criar Avatar' }} />
+            <Stack.Screen name="DevTest" component={DevTestScreen} options={{ title: '🧪 Modo Teste' }} />
+            <Stack.Screen name="Map" component={MapScreen} options={{ title: 'Mapa de Aventuras' }} />
+            <Stack.Screen name="Story" component={StoryScreen} options={{ title: 'História' }} />
+            <Stack.Screen name="MiniGame" component={MiniGameScreen} options={{ title: 'Mini-jogo' }} />
+            <Stack.Screen name="Quiz" component={QuizScreen} options={{ title: 'Perguntas' }} />
+            <Stack.Screen name="Reward" component={RewardScreen} options={{ title: 'Parabéns!' }} />
+            <Stack.Screen name="Album" component={AlbumScreen} options={{ title: 'Álbum de Adesivos' }} />
+            <Stack.Screen name="Parents" component={ParentScreen} options={{ title: 'Para Pais' }} />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </AppProvider>
+    </ErrorBoundary>
   );
 }

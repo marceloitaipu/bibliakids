@@ -62,7 +62,7 @@ export default function CreationPlaceGame({
   const [burst, setBurst] = useState(false);
   const [startedAt, setStartedAt] = useState<number | null>(null);
 
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const shakeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const progressAnim = useRef(new Animated.Value(0)).current;

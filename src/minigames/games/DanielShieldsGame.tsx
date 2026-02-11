@@ -45,7 +45,7 @@ export default function DanielShieldsGame({
   const [burst, setBurst] = useState(false);
   const [canTap, setCanTap] = useState(false);
 
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const shakeAnim = useRef(new Animated.Value(0)).current;
   const lionAnim = useRef(new Animated.Value(0)).current;
   const danielAnim = useRef(new Animated.Value(1)).current;

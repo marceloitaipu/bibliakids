@@ -21,7 +21,6 @@
       "buildNumber": "1.0.0",
       "infoPlist": {
         "UIBackgroundModes": [
-          "audio",
           "audio"
         ]
       }
@@ -34,9 +33,6 @@
       "package": "com.bibliakids.app",
       "versionCode": 1,
       "permissions": [
-        "WRITE_EXTERNAL_STORAGE",
-        "READ_EXTERNAL_STORAGE",
-        "android.permission.MODIFY_AUDIO_SETTINGS",
         "WRITE_EXTERNAL_STORAGE",
         "READ_EXTERNAL_STORAGE",
         "android.permission.MODIFY_AUDIO_SETTINGS"

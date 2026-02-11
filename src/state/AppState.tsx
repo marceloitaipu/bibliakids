@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useMemo, useReducer, useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import levels from '../data/levels.json';
+import AnimatedSplash from '../components/AnimatedSplash';
+import { analytics } from '../utils/analytics';
 
 export type Avatar = {
   name: string;
@@ -137,8 +139,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo(() => ({ state, dispatch, data: levels }), [state]);
 
   if (!loaded) {
-    // Retorna null enquanto carrega (poderia ser uma SplashScreen)
-    return null;
+    return <AnimatedSplash />;
   }
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
@@ -150,22 +151,5 @@ export function useApp() {
   return v;
 }
 
-export function isLevelUnlocked(levelId: string, starsByLevel: Record<string, number>) {
-  const idx = levels.levels.findIndex((l) => l.id === levelId);
-  if (idx <= 0) return true;
-  const prevId = levels.levels[idx - 1]?.id;
-  if (!prevId) return true;
-  const prevStars = starsByLevel[prevId] ?? 0;
-  const unlocked = prevStars > 0;
-  console.log(`isLevelUnlocked(${levelId}): prevId=${prevId}, prevStars=${prevStars}, unlocked=${unlocked}`);
-  return unlocked;
-}
-
-export function shuffle<T>(arr: T[]): T[] {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
+// Re-export utilities for backwards compatibility
+export { isLevelUnlocked, shuffle } from './utils';

@@ -1,10 +1,11 @@
-import React from 'react';
-import { View, Text, Pressable, ScrollView } from 'react-native';
+import React, { useCallback } from 'react';
+import { View, Text, Pressable, ScrollView, Alert } from 'react-native';
 import { theme } from '../theme';
 import Card from '../components/Card';
 import StarsRow from '../components/StarsRow';
 import PrimaryButton from '../components/PrimaryButton';
 import { useApp, isLevelUnlocked } from '../state/AppState';
+import { analytics } from '../utils/analytics';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../App';
 
@@ -15,6 +16,34 @@ export default function MapScreen({ navigation }: Props) {
   
   // Debug: mostra as estrelas no console
   console.log('MapScreen - Estrelas por fase:', state.progress.starsByLevel);
+
+  const handleResetProgress = useCallback(() => {
+    Alert.alert(
+      '⚠️ Reiniciar Progresso',
+      'Tem certeza que deseja apagar todo o progresso? Esta ação não pode ser desfeita!',
+      [
+        {
+          text: 'Cancelar',
+          style: 'cancel',
+        },
+        {
+          text: 'Sim, reiniciar',
+          style: 'destructive',
+          onPress: () => {
+            dispatch({ type: 'RESET' });
+            analytics.clear();
+            analytics.track('app_opened', { reason: 'progress_reset' });
+          },
+        },
+      ],
+      { cancelable: true }
+    );
+  }, [dispatch]);
+
+  const handleLevelPress = useCallback((levelId: string) => {
+    analytics.trackLevelStart(levelId);
+    navigation.navigate('Story', { levelId });
+  }, [navigation]);
 
   return (
     <View style={{ flex: 1 }}>
@@ -35,7 +64,10 @@ export default function MapScreen({ navigation }: Props) {
             <Pressable
               key={lvl.id}
               disabled={!unlocked}
-              onPress={() => navigation.navigate('Story', { levelId: lvl.id })}
+              onPress={() => handleLevelPress(lvl.id)}
+              accessibilityRole="button"
+              accessibilityLabel={`Fase ${idx + 1}: ${lvl.title}. ${unlocked ? `${stars} de 3 estrelas` : 'Bloqueada'}`}
+              accessibilityHint={unlocked ? 'Toque para jogar esta fase' : 'Complete a fase anterior primeiro'}
               style={({ pressed }) => ({
                 opacity: unlocked ? 1 : 0.55,
                 transform: [{ scale: pressed && unlocked ? 0.98 : 1 }],
@@ -84,7 +116,7 @@ export default function MapScreen({ navigation }: Props) {
           />
           <PrimaryButton
             title="🔄 Reiniciar progresso"
-            onPress={() => dispatch({ type: 'RESET' })}
+            onPress={handleResetProgress}
             style={{ backgroundColor: theme.colors.bad }}
           />
         </Card>

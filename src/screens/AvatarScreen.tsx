@@ -100,7 +100,7 @@ export default function AvatarScreen({ navigation }: Props) {
       <PrimaryButton
         title="Ir para o mapa"
         onPress={() => {
-          dispatch({ type: 'SET_AVATAR', avatar: { name: name.trim(), skin, outfit } as any });
+          dispatch({ type: 'SET_AVATAR', avatar: { name: name.trim(), skin, outfit } });
           navigation.replace('Map');
         }}
         disabled={!canContinue}
