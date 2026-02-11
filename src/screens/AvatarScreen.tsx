@@ -10,7 +10,7 @@ import type { RootStackParamList } from '../../App';
 type Props = NativeStackScreenProps<RootStackParamList, 'Avatar'>;
 
 const skins = [
-  { key: 'clara', label: '�🏻' },
+  { key: 'clara', label: '👶🏻' },
   { key: 'media', label: '👶🏽' },
   { key: 'escura', label: '👶🏿' },
 ] as const;
