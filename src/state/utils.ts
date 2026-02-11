@@ -19,14 +19,20 @@ export function shuffle<T>(arr: T[]): T[] {
 
 /**
  * Verifica se um level está desbloqueado baseado nas estrelas dos níveis anteriores
+ * Verifica TODOS os níveis anteriores, não apenas o imediatamente anterior
  */
 export function isLevelUnlocked(levelId: string, starsByLevel: Record<string, number>): boolean {
   const idx = levels.levels.findIndex((l) => l.id === levelId);
-  if (idx <= 0) return true;
-  const prevId = levels.levels[idx - 1]?.id;
-  if (!prevId) return true;
-  const prevStars = starsByLevel[prevId] ?? 0;
-  return prevStars > 0;
+  if (idx <= 0) return true; // Primeiro nível sempre desbloqueado
+  
+  // Verificar se TODOS os níveis anteriores foram completados
+  for (let i = 0; i < idx; i++) {
+    const prevId = levels.levels[i].id;
+    if ((starsByLevel[prevId] ?? 0) === 0) {
+      return false;
+    }
+  }
+  return true;
 }
 
 /**
