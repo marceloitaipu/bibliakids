@@ -48,11 +48,25 @@ export default function MapScreen({ navigation }: Props) {
   return (
     <View style={{ flex: 1 }}>
       <ScrollView contentContainerStyle={{ padding: theme.spacing(2), gap: theme.spacing(2) }}>
-        <Card>
-          <Text style={{ ...theme.typography.title, color: theme.colors.primary }}>Mapa de Aventuras</Text>
-          <Text style={{ ...theme.typography.body, color: theme.colors.muted, marginTop: 6 }}>
-            Toque em uma fase para ouvir a historinha e responder as perguntas.
-          </Text>
+        <Card style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+          <View style={{ flex: 1 }}>
+            <Text style={{ ...theme.typography.title, color: theme.colors.primary }}>Mapa de Aventuras</Text>
+            <Text style={{ ...theme.typography.body, color: theme.colors.muted, marginTop: 6 }}>
+              Toque em uma fase para jogar!
+            </Text>
+          </View>
+          <Pressable
+            onPress={handleResetProgress}
+            accessibilityRole="button"
+            accessibilityLabel="Reiniciar jogo do zero"
+            style={({ pressed }) => ({
+              padding: 12,
+              borderRadius: theme.radius.md,
+              backgroundColor: pressed ? theme.colors.bad + '40' : theme.colors.stroke,
+            })}
+          >
+            <Text style={{ fontSize: 24 }}>🔄</Text>
+          </Pressable>
         </Card>
 
         {data.levels.map((lvl, idx) => {
@@ -115,7 +129,7 @@ export default function MapScreen({ navigation }: Props) {
             variant="accent"
           />
           <PrimaryButton
-            title="🔄 Reiniciar progresso"
+            title="🔄 Reiniciar jogo do zero"
             onPress={handleResetProgress}
             style={{ backgroundColor: theme.colors.bad }}
           />

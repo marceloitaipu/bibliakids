@@ -21,10 +21,23 @@ export default function QuizScreen({ route, navigation }: Props) {
   useBgm(level?.id, state.settings.music);
   const { playSuccess, playFail, playTap, playPerfect } = useSfx(state.settings.sound);
 
+  // Embaralha as perguntas
   const questions = useMemo(() => {
     const base = level?.questions ?? [];
     return state.settings.shuffleQuestions ? shuffle(base) : base;
   }, [level?.id, state.settings.shuffleQuestions]);
+
+  // Embaralha as opções de cada pergunta (mantendo o índice correto)
+  const shuffledQuestions = useMemo(() => {
+    if (!state.settings.shuffleQuestions) return questions;
+    return questions.map(q => {
+      const indices = q.options.map((_, i) => i);
+      const shuffledIndices = shuffle(indices);
+      const newOptions = shuffledIndices.map(i => q.options[i]);
+      const newAnswerIndex = shuffledIndices.indexOf(q.answerIndex);
+      return { ...q, options: newOptions, answerIndex: newAnswerIndex };
+    });
+  }, [questions, state.settings.shuffleQuestions]);
 
   const [i, setI] = useState(0);
   const [correct, setCorrect] = useState(0);
@@ -33,8 +46,8 @@ export default function QuizScreen({ route, navigation }: Props) {
   const [showExplain, setShowExplain] = useState(false);
   const [burst, setBurst] = useState(false);
 
-  const q = questions[i];
-  const total = questions.length;
+  const q = shuffledQuestions[i];
+  const total = shuffledQuestions.length;
 
   const progressText = useMemo(() => `Pergunta ${i + 1} de ${total}`, [i, total]);
 
