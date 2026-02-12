@@ -4,19 +4,22 @@
 
 ---
 
-## 🎮 **ACESSE O APP AGORA!**
+## 🎮 **INSTALE O APP NO SEU CELULAR!**
 
-### 📱 Como testar no celular:
+### 📱 Opção 1: Expo Go (Mais Fácil)
 
-1. **Instale o Expo Go:**
+1. **Baixe o Expo Go no seu celular:**
    - 🤖 [Android - Play Store](https://play.google.com/store/apps/details?id=host.exp.exponent)
    - 🍎 [iOS - App Store](https://apps.apple.com/app/expo-go/id982107779)
 
-2. **Abra o Expo Go e:**
-   - Escaneie o QR Code (quando o servidor estiver rodando)
-   - **OU** digite manualmente: `exp://mdrsldu-marceloitaipu-8081.exp.direct`
+2. **Acesse o app:**
+   - Abra o Expo Go
+   - Toque em "Enter URL manually"
+   - Digite: `exp://u.expo.dev/a3a0f0e4-7bb8-4b4f-ab86-08702ed78695`
 
-3. **Pronto!** O app abrirá no seu celular 🎉
+### 📦 Opção 2: Baixar APK (Android)
+
+Acesse a página de [Releases](https://github.com/marceloitaipu/bibliakids/releases) para baixar o APK mais recente.
 
 ---
 
@@ -25,22 +28,23 @@
 **Aventuras da Bíblia** ensina histórias bíblicas para crianças através de:
 - 📚 **7 Níveis de histórias** com narração e texto
 - 🎮 **Minijogos interativos** temáticos
-- ❓ **Quizzes educativos** (3 perguntas por nível)
+- ❓ **Quizzes educativos** com perguntas aleatórias
 - ⭐ **Sistema de estrelas** e progressão
 - 🎨 **Visual colorido** com gradientes e animações
 - 🔊 **Música de fundo** e efeitos sonoros
 - 💾 **Salvamento automático** do progresso
+- 🔄 **Botão de reiniciar** o jogo do zero
 
 ---
 
-## ✨ Melhorias Recentes (02/02/2026)
-- ✅ **Persistência implementada**: Progresso salvo automaticamente
-- ✅ **Bugs corrigidos**: Erros de referência resolvidos
-- ✅ **Tipagem melhorada**: TypeScript mais rigoroso
-- ✅ **Design aprimorado**: Gradientes, sombras coloridas, animações
-- ✅ **Pronto para iOS/Android**: Configurações completas
-- ✅ **Publicado com túnel Expo**: URL pública disponível
-- ✅ **Documentação expandida**: 8 guias detalhados
+## ✨ Melhorias Recentes
+- ✅ **Jogo randomizado**: Perguntas E opções embaralhadas
+- ✅ **Reiniciar do zero**: Botão fácil de acessar
+- ✅ **Persistência**: Progresso salvo automaticamente
+- ✅ **Sistema de bloqueio**: Níveis desbloqueiam em sequência
+- ✅ **21 testes unitários** passando
+- ✅ **Analytics**: Rastreamento de uso
+- ✅ **Acessibilidade**: Labels para leitores de tela
 
 ---
 
