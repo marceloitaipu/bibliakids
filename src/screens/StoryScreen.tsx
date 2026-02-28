@@ -112,7 +112,7 @@ export default function StoryScreen({ route, navigation }: Props) {
           <Text style={{ ...theme.typography.subtitle, color: theme.colors.primary }}>A História</Text>
         </View>
 
-        <SpeakButton text={storyText} enabled={state.settings.narration} label="Ouvir historinha" />
+        <SpeakButton text={storyText} enabled={state.settings.narration} autoPlay label="Ouvir historinha" />
 
         <View style={{ 
           backgroundColor: theme.colors.bg, 
