@@ -3,6 +3,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import levels from '../data/levels.json';
 import AnimatedSplash from '../components/AnimatedSplash';
 import { analytics } from '../utils/analytics';
+import { logger } from '../utils/logger';
+import type { LevelsData } from '../data/types';
+
+const log = logger.module('AppState');
+const typedLevels = levels as unknown as LevelsData;
 
 export type Avatar = {
   name: string;
@@ -36,6 +41,8 @@ type Action =
   | { type: 'RESET' }
   | { type: 'HYDRATE'; state: State };
 
+const STORAGE_KEY = '@bibliakids_state';
+
 const initialState: State = {
   avatar: null,
   progress: {
@@ -57,7 +64,7 @@ function reducer(state: State, action: Action): State {
       return { ...state, avatar: action.avatar };
 
     case 'SET_STARS': {
-      console.log('Reducer SET_STARS:', action);
+      log.debug('Reducer SET_STARS:', action);
       const prev = state.progress.starsByLevel[action.levelId] ?? 0;
       const best = Math.max(prev, action.stars);
       const stickers = { ...state.progress.stickers };
@@ -70,7 +77,7 @@ function reducer(state: State, action: Action): State {
           stickers,
         },
       };
-      console.log('Novo starsByLevel:', newState.progress.starsByLevel);
+      log.debug('Novo starsByLevel:', newState.progress.starsByLevel);
       return newState;
     }
 
@@ -78,6 +85,10 @@ function reducer(state: State, action: Action): State {
       return { ...state, settings: { ...state.settings, [action.key]: action.value } };
 
     case 'RESET':
+      // Limpar AsyncStorage de forma síncrona-fire-and-forget para
+      // garantir que o estado persistido seja removido mesmo que
+      // o useEffect de save ainda não tenha rodado.
+      AsyncStorage.removeItem(STORAGE_KEY).catch(() => {});
       return initialState;
 
     case 'HYDRATE':
@@ -91,10 +102,8 @@ function reducer(state: State, action: Action): State {
 const Ctx = createContext<{
   state: State;
   dispatch: React.Dispatch<Action>;
-  data: typeof levels;
+  data: LevelsData;
 } | null>(null);
-
-const STORAGE_KEY = '@bibliakids_state';
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(reducer, initialState);
@@ -105,10 +114,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const loadState = async () => {
       try {
         const stored = await AsyncStorage.getItem(STORAGE_KEY);
-        console.log('Carregando estado do AsyncStorage:', stored);
+        log.debug('Carregando estado do AsyncStorage:', stored);
         if (stored) {
           const parsed = JSON.parse(stored);
-          console.log('Estado carregado - starsByLevel:', parsed.progress?.starsByLevel);
+          log.debug('Estado carregado - starsByLevel:', parsed.progress?.starsByLevel);
           dispatch({ type: 'HYDRATE', state: parsed });
         }
       } catch (e) {
@@ -125,9 +134,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (loaded) {
       const saveState = async () => {
         try {
-          console.log('Salvando estado no AsyncStorage:', state.progress.starsByLevel);
+          log.debug('Salvando estado no AsyncStorage:', state.progress.starsByLevel);
           await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-          console.log('Estado salvo com sucesso!');
+          log.debug('Estado salvo com sucesso!');
         } catch (e) {
           console.warn('Failed to save state:', e);
         }
@@ -136,7 +145,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   }, [state, loaded]);
 
-  const value = useMemo(() => ({ state, dispatch, data: levels }), [state]);
+  const value = useMemo(() => ({ state, dispatch, data: typedLevels }), [state]);
 
   if (!loaded) {
     return <AnimatedSplash />;

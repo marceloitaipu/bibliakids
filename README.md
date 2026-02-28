@@ -103,7 +103,7 @@ Avatar -> Mapa -> História -> Mini-jogo -> Quiz -> Recompensa -> Álbum
 7) Parábolas — Plantar no Solo Certo
 
 ## Onde está o som
-- Hook: `src/sfx/useSfx.ts`
+- Provider global: `src/sfx/SoundManager.tsx`
 - Arquivos: `assets/sfx/*.wav` (offline)
 
 ## Onde está a animação de celebração

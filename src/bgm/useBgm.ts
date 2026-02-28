@@ -27,6 +27,7 @@ function getTrack(levelId: string) {
 export function useBgm(levelId: string | undefined, enabled: boolean) {
   const sound = useRef<Audio.Sound | null>(null);
   const current = useRef<string | null>(null);
+  const debounce = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     let alive = true;
@@ -71,10 +72,14 @@ export function useBgm(levelId: string | undefined, enabled: boolean) {
       } catch (e) {}
     };
 
-    start();
+    // Debounce de 150ms para evitar sobreposição de áudio em
+    // navegações rápidas entre telas.
+    if (debounce.current) clearTimeout(debounce.current);
+    debounce.current = setTimeout(start, 150);
 
     return () => {
       alive = false;
+      if (debounce.current) clearTimeout(debounce.current);
       stop();
     };
   }, [levelId, enabled]);

@@ -1,23 +1,23 @@
 // Mini-game: Jonas - Fuja das Tempestades!
 // Desvie dos obstáculos no mar enquanto a baleia leva Jonas para a segurança
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { View, Text, Pressable, Animated, Dimensions, PanResponder } from 'react-native';
+import { View, Text, Pressable, Animated, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Card from '../../components/Card';
 import PrimaryButton from '../../components/PrimaryButton';
 import SpeakButton from '../../components/SpeakButton';
 import ConfettiBurst from '../../components/ConfettiBurst';
-import { useSfx } from '../../sfx/useSfx';
+import { useSfx } from '../../sfx/SoundManager';
 import { useApp } from '../../state/AppState';
 import { theme } from '../../theme';
 import type { MiniGameResult } from '../types';
 
-const { width, height } = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 const GAME_WIDTH = Math.min(width - 40, 350);
 const GAME_HEIGHT = 300;
 const WHALE_SIZE = 50;
 const OBSTACLE_SIZE = 40;
-const TOTAL_DISTANCE = 200; // Jogo mais longo
+const TOTAL_DISTANCE = 100; // Progresso em porcentagem (0-100)
 
 type Obstacle = {
   id: number;
@@ -56,6 +56,9 @@ export default function JonahGuideGame({
 
   const gameLoopRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const obstacleIdRef = useRef(0);
+  const lastSpeedUpRef = useRef(0); // Guard for speed-up to prevent re-trigger loop
+  const livesRef = useRef(3);       // Mirror lives to avoid side effects in setState
+  const distanceRef = useRef(0);    // Mirror distance to avoid side effects in setState
   const shakeAnim = useRef(new Animated.Value(0)).current;
   const whaleAnim = useRef(new Animated.Value(1)).current;
 
@@ -89,6 +92,7 @@ export default function JonahGuideGame({
 
   const finish = useCallback((won: boolean) => {
     if (gameLoopRef.current) clearInterval(gameLoopRef.current);
+    gameLoopRef.current = null;
     setStep('done');
     if (won) playPerfect();
     else playFail();
@@ -96,10 +100,8 @@ export default function JonahGuideGame({
 
   const gameLoop = useCallback(() => {
     setDistance(d => {
-      const newDist = d + 0.5; // Progresso mais lento
-      if (newDist >= TOTAL_DISTANCE) {
-        finish(true);
-      }
+      const newDist = d + 0.5;
+      distanceRef.current = newDist;
       return newDist;
     });
 
@@ -123,7 +125,7 @@ export default function JonahGuideGame({
 
     // Add score for surviving
     setScore(s => s + 5);
-  }, [finish]);
+  }, []);
 
   // Check collisions in separate effect
   useEffect(() => {
@@ -133,13 +135,9 @@ export default function JonahGuideGame({
     if (hit) {
       setIsHit(true);
       playFail();
-      setLives(l => {
-        const newLives = l - 1;
-        if (newLives <= 0) {
-          finish(false);
-        }
-        return newLives;
-      });
+      const newLives = livesRef.current - 1;
+      livesRef.current = newLives;
+      setLives(newLives);
       
       // Remove the obstacle that hit
       setObstacles(obs => obs.filter(o => o.id !== hit.id));
@@ -151,9 +149,20 @@ export default function JonahGuideGame({
         Animated.timing(shakeAnim, { toValue: 0, duration: 50, useNativeDriver: true }),
       ]).start();
       
+      if (newLives <= 0) {
+        finish(false);
+      }
+      
       setTimeout(() => setIsHit(false), 500);
     }
   }, [whaleY, obstacles, step, isHit, checkCollision, playFail, finish, shakeAnim]);
+
+  // Check if distance reached goal (separate from setState)
+  useEffect(() => {
+    if (step === 'play' && distance >= TOTAL_DISTANCE) {
+      finish(true);
+    }
+  }, [distance, step, finish]);
 
   const start = () => {
     setStartedAt(Date.now());
@@ -162,10 +171,14 @@ export default function JonahGuideGame({
     setWhaleY(GAME_HEIGHT / 2);
     setObstacles([]);
     setDistance(0);
+    distanceRef.current = 0;
     setLives(3);
+    livesRef.current = 3;
     setScore(0);
+    setSpeed(120);
+    lastSpeedUpRef.current = 0;
     
-    gameLoopRef.current = setInterval(gameLoop, speed);
+    gameLoopRef.current = setInterval(gameLoop, 120);
   };
 
   useEffect(() => {
@@ -174,15 +187,18 @@ export default function JonahGuideGame({
     };
   }, []);
 
-  // Speed up as distance increases
+  // Speed up as distance increases (with guard to prevent re-trigger loop)
   useEffect(() => {
-    if (step === 'play' && distance > 0 && distance % 20 === 0) {
+    if (step !== 'play' || distance <= 0) return;
+    const milestone = Math.floor(distance / 25); // Speed up at 25, 50, 75
+    if (milestone > lastSpeedUpRef.current && milestone <= 3) {
+      lastSpeedUpRef.current = milestone;
       if (gameLoopRef.current) clearInterval(gameLoopRef.current);
-      const newSpeed = Math.max(15, speed - 3);
+      const newSpeed = Math.max(60, 120 - milestone * 20);
       setSpeed(newSpeed);
       gameLoopRef.current = setInterval(gameLoop, newSpeed);
     }
-  }, [distance, step, speed, gameLoop]);
+  }, [distance, step, gameLoop]);
 
   const handleDone = () => {
     const seconds = startedAt ? Math.max(1, Math.round((Date.now() - startedAt) / 1000)) : 1;
@@ -237,7 +253,7 @@ export default function JonahGuideGame({
             </View>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
               <Text style={{ fontWeight: '700' }}>📍 Distância:</Text>
-              <Text style={{ fontWeight: '800', color: theme.colors.ok }}>{distance}%</Text>
+              <Text style={{ fontWeight: '800', color: theme.colors.ok }}>{Math.min(100, Math.round(distance))}%</Text>
             </View>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
               <Text style={{ fontWeight: '700' }}>❤️ Vidas restantes:</Text>
@@ -266,7 +282,7 @@ export default function JonahGuideGame({
 
       {/* Progress to beach */}
       <View style={{ height: 16, backgroundColor: theme.colors.stroke, borderRadius: 8, overflow: 'hidden', flexDirection: 'row', alignItems: 'center' }}>
-        <View style={{ height: '100%', backgroundColor: '#4169E1', width: `${distance}%`, borderRadius: 8 }} />
+        <View style={{ height: '100%', backgroundColor: '#4169E1', width: `${Math.min(100, distance)}%`, borderRadius: 8 }} />
         <View style={{ position: 'absolute', left: `${Math.min(distance, 95)}%` }}>
           <Text style={{ fontSize: 14 }}>🐋</Text>
         </View>

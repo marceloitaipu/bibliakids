@@ -1,5 +1,5 @@
 # Estado Atual do Projeto BibliaKids
-**Data:** 12 de fevereiro de 2026  
+**Última atualização:** Junho de 2025  
 **Repositório:** github.com/marceloitaipu/bibliakids  
 **Status:** ✅ App completo e funcional | ⏳ Aguardando geração de APK
 
@@ -19,15 +19,16 @@
 ## 📦 O Que Já Foi Feito
 
 ### ✅ Desenvolvimento Completo
-- 7 níveis bíblicos (Criação, Noé, Abraão, Moisés, Daniel, Jonas, Parábolas)
-- 7 minigames interativos
+- 7 níveis bíblicos (Criação, Noé, Davi, Daniel, Jonas, Jesus Nascimento, Parábolas)
+- 7 minigames interativos (creation_place, noe_pairs, david_stone, daniel_shields, jonah_guide, star_path, parables_seed)
 - Sistema de quiz com randomização de perguntas E respostas
-- Sistema de recompensas e álbum
-- Avatares personalizáveis
+- Sistema de recompensas e álbum com barra de progresso
+- Avatares personalizáveis com preview ao vivo
 - Música de fundo + efeitos sonoros
 - Tela para pais com configurações
+- Histórias enriquecidas com 3 linhas de narrativa por nível
 
-### ✅ Correções Implementadas
+### ✅ Correções Implementadas (Rodada Anterior)
 1. **Emoji corrompido**: Corrigido `👶🏻` (pele clara) em AvatarScreen.tsx
 2. **Bug de desbloqueio**: Jonas (nível 5) aparecia desbloqueado incorretamente
    - **Arquivo**: `src/state/utils.ts` - função `isLevelUnlocked`
@@ -36,9 +37,28 @@
    - **Arquivo**: `src/screens/QuizScreen.tsx` - `shuffledQuestions`
 4. **Botão de reset**: 🔄 no cabeçalho do MapScreen para reiniciar progresso
 
+### ✅ Correções e Melhorias (Rodada Atual)
+
+#### Bugs Corrigidos
+1. **BUG CRÍTICO — QuizScreen double-counting**: A função `next()` calculava `doneCorrect = correct + lastOk`, mas `correct` já era incrementado em `onPick()`. A última resposta correta era contada duas vezes, inflando a pontuação. Corrigido para usar `correct` diretamente.
+2. **MapScreen "fase 0"**: Quando idx=1, mostrava "Complete a fase 0 primeiro!" (usando idx como 0-based). Corrigido para exibir o título real do nível anterior.
+3. **Imports não utilizados**: Removidos `PanResponder` (ParablesSeedGame), `Dimensions` (DanielShieldsGame/JonahGuideGame), `useMemo` (JonahGuideGame).
+
+#### Minigames Melhorados
+4. **NoePairsGame**: Aumentado de 3 para 6 pares (12 cartas em grid 4×3). Limiares de avaliação agora dinâmicos baseados em `totalPairs` em vez de hardcoded.
+
+#### Telas Reescritas
+5. **StoryScreen**: Banner hero com gradiente por nível, emojis temáticos, animações de entrada (fade + slide + spring), styling de citação com borda lateral, suporte a 3 linhas de história.
+6. **AlbumScreen**: Barra de progresso com gradiente, contagem de adesivos, mensagem de conclusão, badges circulares dos emojis, distinção visual entre adesivos conquistados/bloqueados.
+7. **AvatarScreen**: Preview do avatar ao vivo (mostra skin + roupa + nome), ScrollView, maxLength no input de nome, accessibility labels/states, indicadores de cor e nomes para cada opção.
+8. **MapScreen**: Header com gradiente mostrando saudação pelo nome, progresso total de estrelas com mini barra, cards de níveis com avatar circular de emoji, menu simplificado.
+
+#### Conteúdo Enriquecido
+9. **Stories**: Todas as 7 histórias enriquecidas com `line3` (terceira linha de narrativa). Interface `Story` atualizada com campo opcional `line3`.
+
 ### ✅ Testes
 - 21/21 testes passando
-- Cobertura: QuizScreen, utils, AppState
+- Cobertura: QuizScreen, utils, AppState, Analytics
 - Comando: `npm test`
 
 ### ✅ GitHub
@@ -266,7 +286,10 @@ npx expo start --lan
 ## ✅ Checklist Final
 
 - [x] App desenvolvido e funcional
-- [x] Bugs corrigidos (emoji, unlock, randomização)
+- [x] Bugs corrigidos (emoji, unlock, randomização, double-counting, fase 0)
+- [x] Telas reescritas (StoryScreen, AlbumScreen, AvatarScreen, MapScreen)
+- [x] Minigames melhorados (NoePairsGame)
+- [x] Conteúdo enriquecido (histórias com 3 linhas)
 - [x] Testes passando (21/21)
 - [x] Código no GitHub
 - [ ] **APK gerado** ← PRÓXIMO PASSO

@@ -7,7 +7,7 @@ import Card from '../../components/Card';
 import PrimaryButton from '../../components/PrimaryButton';
 import SpeakButton from '../../components/SpeakButton';
 import ConfettiBurst from '../../components/ConfettiBurst';
-import { useSfx } from '../../sfx/useSfx';
+import { useSfx } from '../../sfx/SoundManager';
 import { useApp } from '../../state/AppState';
 import { theme } from '../../theme';
 import type { MiniGameResult } from '../types';
@@ -39,6 +39,7 @@ export default function DavidStoneGame({
   const [speed, setSpeed] = useState(2000); // ms for full oscillation
 
   const cursorAnim = useRef(new Animated.Value(0)).current;
+  const cursorPosRef = useRef(0); // Track cursor position without private API
   const stoneAnim = useRef(new Animated.Value(0)).current;
   const goliasAnim = useRef(new Animated.Value(1)).current;
   const shakeAnim = useRef(new Animated.Value(0)).current;
@@ -46,6 +47,13 @@ export default function DavidStoneGame({
 
   const startOscillation = useCallback(() => {
     cursorAnim.setValue(0);
+    cursorPosRef.current = 0;
+
+    // Use a listener to track the animated value
+    const listenerId = cursorAnim.addListener(({ value }) => {
+      cursorPosRef.current = value;
+    });
+
     animRef.current = Animated.loop(
       Animated.sequence([
         Animated.timing(cursorAnim, { toValue: 1, duration: speed / 2, easing: Easing.linear, useNativeDriver: true }),
@@ -53,6 +61,8 @@ export default function DavidStoneGame({
       ])
     );
     animRef.current.start();
+
+    return listenerId;
   }, [cursorAnim, speed]);
 
   const stopOscillation = () => {
@@ -91,8 +101,8 @@ export default function DavidStoneGame({
     setIsAnimating(true);
     playTap();
 
-    // Get current cursor position
-    const currentPosition = (cursorAnim as any)._value || 0;
+    // Get current cursor position via tracked ref
+    const currentPosition = cursorPosRef.current;
     const zone = calculateHitZone(currentPosition);
     const points = getPoints(zone);
 
@@ -155,7 +165,10 @@ export default function DavidStoneGame({
   };
 
   useEffect(() => {
-    return () => stopOscillation();
+    return () => {
+      stopOscillation();
+      cursorAnim.removeAllListeners();
+    };
   }, []);
 
   const handleDone = () => {
@@ -163,7 +176,7 @@ export default function DavidStoneGame({
     const bullseyes = hits.filter(h => h === 'bullseye').length;
     const accuracy = hits.length > 0 ? (hits.filter(h => h !== 'miss').length / hits.length) : 0;
     const finalScore = Math.round(50 + accuracy * 50);
-    onDone({ completed: true, score: finalScore, mistakes: hits.filter(h => h === 'miss').length, seconds });
+    onDone({ completed: accuracy >= 0.5, score: finalScore, mistakes: hits.filter(h => h === 'miss').length, seconds });
   };
 
   const instruction = 'Mire no alvo! Golias está se movendo - acerte o momento perfeito para lançar a pedra de Davi e derrubar o gigante!';

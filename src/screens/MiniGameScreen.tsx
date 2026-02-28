@@ -5,7 +5,7 @@ import Card from '../components/Card';
 import PrimaryButton from '../components/PrimaryButton';
 import ConfettiBurst from '../components/ConfettiBurst';
 import ErrorBoundary from '../components/ErrorBoundary';
-import { useSfx } from '../sfx/useSfx';
+import { useSfx } from '../sfx/SoundManager';
 import { useApp } from '../state/AppState';
 import { MiniGameRegistry } from '../minigames/registry';
 import { analytics } from '../utils/analytics';
@@ -42,9 +42,7 @@ export default function MiniGameScreen({ route, navigation }: Props) {
     return () => clearTimeout(timer);
   }, []);
 
-  const cfg: MiniGameConfig = level 
-    ? ((level as any).minigame ?? { type: 'noe_pairs', pairsToMatch: 3 })
-    : { type: 'noe_pairs', pairsToMatch: 3 };
+  const cfg: MiniGameConfig = level?.minigame ?? { type: 'noe_pairs', pairsToMatch: 3 };
   const GameComp = MiniGameRegistry[cfg.type];
   const gameTitle = prettyName[cfg.type] ?? 'Mini-jogo';
 
@@ -107,9 +105,9 @@ export default function MiniGameScreen({ route, navigation }: Props) {
         >
           <GameComp 
             key={gameKey}
-            {...(cfg as any)} 
             narrationEnabled={state.settings.narration} 
-            onDone={onDone} 
+            onDone={onDone}
+            pairsToMatch={'pairsToMatch' in cfg ? cfg.pairsToMatch : undefined}
           />
         </ErrorBoundary>
       )}

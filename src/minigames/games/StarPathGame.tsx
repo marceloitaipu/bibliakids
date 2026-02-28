@@ -1,13 +1,13 @@
 // Mini-game: Reis Magos - Simon Says com a Estrela!
 // Memorize a sequência de direções que a estrela mostra
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { View, Text, Pressable, Animated } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Card from '../../components/Card';
 import PrimaryButton from '../../components/PrimaryButton';
 import SpeakButton from '../../components/SpeakButton';
 import ConfettiBurst from '../../components/ConfettiBurst';
-import { useSfx } from '../../sfx/useSfx';
+import { useSfx } from '../../sfx/SoundManager';
 import { useApp } from '../../state/AppState';
 import { theme } from '../../theme';
 import type { MiniGameResult } from '../types';
@@ -40,6 +40,17 @@ export default function StarPathGame({
 
   const starAnim = useRef(new Animated.Value(1)).current;
   const shakeAnim = useRef(new Animated.Value(0)).current;
+  const starLayoutRef = useRef({ width: 300, height: 180 });
+
+  // Memoize decorative star positions to prevent re-render flickering
+  const decorativeStars = useMemo(() => 
+    Array.from({ length: 8 }, (_, i) => ({
+      id: i,
+      top: 10 + Math.random() * 100,
+      left: 20 + Math.random() * 200,
+      fontSize: 8 + Math.random() * 8,
+      opacity: 0.3 + Math.random() * 0.4,
+    })), []);
 
   const addToSequence = useCallback(() => {
     const newDir = DIRECTIONS[Math.floor(Math.random() * DIRECTIONS.length)];
@@ -246,8 +257,8 @@ export default function StarPathGame({
   const handleTouch = (e: any) => {
     if (step !== 'playing') return;
     const { locationX, locationY } = e.nativeEvent;
-    const centerX = 150; // Approximate center of game area
-    const centerY = 90;
+    const centerX = starLayoutRef.current.width / 2;
+    const centerY = starLayoutRef.current.height / 2;
     const dx = locationX - centerX;
     const dy = locationY - centerY;
     
@@ -282,15 +293,18 @@ export default function StarPathGame({
         <Pressable onPress={handleTouch} disabled={step !== 'playing'}>
           <LinearGradient colors={['#1a1a2e', '#16213e'] as const} style={{ 
             borderRadius: 20, padding: 24, alignItems: 'center', minHeight: 180,
+          }}
+          onLayout={(e) => {
+            starLayoutRef.current = { width: e.nativeEvent.layout.width, height: e.nativeEvent.layout.height };
           }}>
-          {/* Decorative stars */}
-          {[...Array(8)].map((_, i) => (
-            <View key={i} style={{ 
+          {/* Decorative stars (memoized to prevent flicker) */}
+          {decorativeStars.map((s) => (
+            <View key={s.id} style={{ 
               position: 'absolute', 
-              top: 10 + Math.random() * 100,
-              left: 20 + Math.random() * 200,
+              top: s.top,
+              left: s.left,
             }}>
-              <Text style={{ fontSize: 8 + Math.random() * 8, opacity: 0.3 + Math.random() * 0.4 }}>✨</Text>
+              <Text style={{ fontSize: s.fontSize, opacity: s.opacity }}>✨</Text>
             </View>
           ))}
 

@@ -7,7 +7,7 @@ import Card from '../../components/Card';
 import PrimaryButton from '../../components/PrimaryButton';
 import SpeakButton from '../../components/SpeakButton';
 import ConfettiBurst from '../../components/ConfettiBurst';
-import { useSfx } from '../../sfx/useSfx';
+import { useSfx } from '../../sfx/SoundManager';
 import { useApp } from '../../state/AppState';
 import { theme } from '../../theme';
 import type { MiniGameResult } from '../types';
@@ -165,8 +165,9 @@ export default function CreationPlaceGame({
   const handleDone = () => {
     const seconds = startedAt ? Math.max(1, Math.round((Date.now() - startedAt) / 1000)) : 1;
     const accuracy = questions.length > 0 ? Math.max(0, 1 - mistakes / questions.length) : 1;
+    const allAnswered = currentIdx >= questions.length - 1 && showResult === null;
     const finalScore = Math.round(50 + accuracy * 50);
-    onDone({ completed: true, score: finalScore, mistakes, seconds });
+    onDone({ completed: allAnswered || mistakes === 0, score: finalScore, mistakes, seconds });
   };
 
   const instruction = 'Quiz Relâmpago! Em qual dia da criação Deus fez cada coisa? Quanto mais rápido, mais pontos!';

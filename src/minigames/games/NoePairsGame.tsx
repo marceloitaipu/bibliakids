@@ -7,7 +7,7 @@ import Card from '../../components/Card';
 import PrimaryButton from '../../components/PrimaryButton';
 import SpeakButton from '../../components/SpeakButton';
 import ConfettiBurst from '../../components/ConfettiBurst';
-import { useSfx } from '../../sfx/useSfx';
+import { useSfx } from '../../sfx/SoundManager';
 import { useApp } from '../../state/AppState';
 import { theme } from '../../theme';
 import type { MiniGameResult } from '../types';
@@ -29,8 +29,8 @@ const { width } = Dimensions.get('window');
 const CARD_SIZE = Math.min(70, (width - 80) / 4);
 const TOTAL_TIME = 60;
 
-function createCards(): CardData[] {
-  const pairs = ANIMALS.slice(0, 8);
+function createCards(numPairs: number): CardData[] {
+  const pairs = ANIMALS.slice(0, numPairs);
   const cards: CardData[] = [];
   let id = 0;
   pairs.forEach(p => {
@@ -46,6 +46,7 @@ function createCards(): CardData[] {
 }
 
 export default function NoePairsGame({
+  pairsToMatch = 8,
   narrationEnabled,
   onDone,
 }: {
@@ -69,7 +70,7 @@ export default function NoePairsGame({
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const flipAnims = useRef<Animated.Value[]>([]);
 
-  const totalPairs = 8;
+  const totalPairs = Math.min(pairsToMatch, ANIMALS.length);
   const matchedPairs = matched.size;
 
   const finish = useCallback(() => {
@@ -89,7 +90,7 @@ export default function NoePairsGame({
   }, []);
 
   const start = () => {
-    const newCards = createCards();
+    const newCards = createCards(totalPairs);
     setCards(newCards);
     flipAnims.current = newCards.map(() => new Animated.Value(0));
     setStartedAt(Date.now());
@@ -195,7 +196,9 @@ export default function NoePairsGame({
   if (step === 'done') {
     const won = matchedPairs >= totalPairs;
     const efficiency = Math.round((totalPairs / Math.max(1, moves)) * 100);
-    const rating = won && moves <= 12 ? '🏆 PERFEITO!' : won && moves <= 16 ? '⭐ Ótimo!' : won ? '👍 Bom!' : '⏰ Tempo esgotado!';
+    const perfectMoves = totalPairs + 2; // margem de 2 erros
+    const goodMoves = totalPairs * 2;
+    const rating = won && moves <= perfectMoves ? '🏆 PERFEITO!' : won && moves <= goodMoves ? '⭐ Ótimo!' : won ? '👍 Bom!' : '⏰ Tempo esgotado!';
     
     return (
       <View style={{ gap: theme.spacing(2) }}>

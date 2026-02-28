@@ -6,6 +6,7 @@ import { StatusBar } from 'expo-status-bar';
 
 import { theme } from './src/theme';
 import { AppProvider } from './src/state/AppState';
+import { SfxProvider } from './src/sfx/SoundManager';
 import ErrorBoundary from './src/components/ErrorBoundary';
 
 import AvatarScreen from './src/screens/AvatarScreen';
@@ -39,6 +40,7 @@ export default function App() {
       fallbackMessage="O aplicativo encontrou um problema. Por favor, reinicie o app."
     >
       <AppProvider>
+        <SfxProvider>
         <NavigationContainer>
           <StatusBar style="dark" />
           <Stack.Navigator
@@ -61,6 +63,7 @@ export default function App() {
             <Stack.Screen name="Parents" component={ParentScreen} options={{ title: 'Para Pais' }} />
           </Stack.Navigator>
         </NavigationContainer>
+        </SfxProvider>
       </AppProvider>
     </ErrorBoundary>
   );

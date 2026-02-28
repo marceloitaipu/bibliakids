@@ -6,12 +6,13 @@ import PrimaryButton from '../components/PrimaryButton';
 import SpeakButton from '../components/SpeakButton';
 import ConfettiBurst from '../components/ConfettiBurst';
 import Pulse from '../components/Pulse';
-import { useSfx } from '../sfx/useSfx';
+import { useSfx } from '../sfx/SoundManager';
 import { useApp, shuffle } from '../state/AppState';
 import { analytics } from '../utils/analytics';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../App';
 import { useBgm } from '../bgm/useBgm';
+import { logger } from '../utils/logger';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Quiz'>;
 
@@ -75,13 +76,13 @@ export default function QuizScreen({ route, navigation }: Props) {
 
   const next = useCallback(() => {
     if (i + 1 >= total) {
-      const lastOk = chosen === q?.answerIndex ? 1 : 0;
-      const doneCorrect = correct + lastOk;
+      // correct já inclui o acerto da última pergunta (atualizado em onPick)
+      const doneCorrect = correct;
 
-      const ratio = doneCorrect / total;
+      const ratio = total > 0 ? doneCorrect / total : 0;
       // Garantir pelo menos 1 estrela para desbloquear próxima fase
       const stars = ratio >= 0.9 ? 3 : ratio >= 0.6 ? 2 : 1;
-      console.log('QuizScreen: Finalizando quiz -', { levelId: level?.id, doneCorrect, total, ratio, stars });
+      logger.module('Quiz').debug('Finalizando quiz -', { levelId: level?.id, doneCorrect, total, ratio, stars });
       
       // Analytics
       analytics.trackQuizComplete(level?.id || '', doneCorrect, total, stars);
@@ -92,7 +93,7 @@ export default function QuizScreen({ route, navigation }: Props) {
     setI((x) => x + 1);
     setChosen(null);
     setShowExplain(false);
-  }, [i, total, chosen, q?.answerIndex, correct, level?.id, level?.stickerId, navigation]);
+  }, [i, total, correct, level?.id, level?.stickerId, navigation]);
 
   if (!level || !q) return null;
 

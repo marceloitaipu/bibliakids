@@ -1,12 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { View, Text } from 'react-native';
 import { theme } from '../theme';
 import Card from '../components/Card';
 import PrimaryButton from '../components/PrimaryButton';
 import StarsRow from '../components/StarsRow';
 import StarRise from '../components/StarRise';
-import { useSfx } from '../sfx/useSfx';
+import { useSfx } from '../sfx/SoundManager';
 import { useApp } from '../state/AppState';
+import { logger } from '../utils/logger';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../App';
 import { useBgm } from '../bgm/useBgm';
@@ -20,18 +21,25 @@ export default function RewardScreen({ route, navigation }: Props) {
   const { playPerfect, playSuccess } = useSfx(state.settings.sound);
   const [showStars, setShowStars] = useState(false);
 
-  useEffect(() => {
-    console.log('RewardScreen: Salvando estrelas -', { levelId, stars, newStickerId });
-    dispatch({ type: 'SET_STARS', levelId, stars, stickerId: stars > 0 ? newStickerId : undefined });
+  const log = logger.module('Reward');
+  // Refs to avoid stale closures in the mount-only effect
+  const dispatchRef = useRef(dispatch);
+  dispatchRef.current = dispatch;
+  const sfxRef = useRef({ playPerfect, playSuccess });
+  sfxRef.current = { playPerfect, playSuccess };
 
-    if (stars >= 3) playPerfect();
-    else if (stars > 0) playSuccess();
+  useEffect(() => {
+    log.debug('Salvando estrelas -', { levelId, stars, newStickerId });
+    dispatchRef.current({ type: 'SET_STARS', levelId, stars, stickerId: stars > 0 ? newStickerId : undefined });
+
+    if (stars >= 3) sfxRef.current.playPerfect();
+    else if (stars > 0) sfxRef.current.playSuccess();
 
     if (state.settings.animations) {
       setShowStars(true);
       setTimeout(() => setShowStars(false), 1100);
     }
-  }, []);
+  }, [levelId, stars, newStickerId, state.settings.animations]);
 
   const msg =
     stars === 3

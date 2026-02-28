@@ -1,13 +1,13 @@
 // Mini-game: Parábola do Semeador - Plante sementes no solo certo!
 // Jogo de estratégia: arraste sementes para os solos corretos antes do tempo acabar
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, Pressable, Animated, PanResponder } from 'react-native';
+import { View, Text, Pressable, Animated } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Card from '../../components/Card';
 import PrimaryButton from '../../components/PrimaryButton';
 import SpeakButton from '../../components/SpeakButton';
 import ConfettiBurst from '../../components/ConfettiBurst';
-import { useSfx } from '../../sfx/useSfx';
+import { useSfx } from '../../sfx/SoundManager';
 import { useApp } from '../../state/AppState';
 import { theme } from '../../theme';
 import type { MiniGameResult } from '../types';

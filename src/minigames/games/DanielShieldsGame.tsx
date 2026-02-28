@@ -1,23 +1,22 @@
 // Mini-game: Daniel na Cova - Reflexo Rápido!
 // Proteja Daniel dos leões que atacam de diferentes direções
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { View, Text, Pressable, Animated, Dimensions } from 'react-native';
+import { View, Text, Pressable, Animated } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Card from '../../components/Card';
 import PrimaryButton from '../../components/PrimaryButton';
 import SpeakButton from '../../components/SpeakButton';
 import ConfettiBurst from '../../components/ConfettiBurst';
-import { useSfx } from '../../sfx/useSfx';
+import { useSfx } from '../../sfx/SoundManager';
 import { useApp } from '../../state/AppState';
 import { theme } from '../../theme';
 import type { MiniGameResult } from '../types';
 
 type Direction = 'up' | 'down' | 'left' | 'right';
 
-const { width } = Dimensions.get('window');
-const TOTAL_ROUNDS = 15;
+const TOTAL_ROUNDS = 12;
 const INITIAL_TIME = 2000; // ms to react
-const MIN_TIME = 600;
+const MIN_TIME = 800;
 
 const DIRECTIONS: Direction[] = ['up', 'down', 'left', 'right'];
 
@@ -46,6 +45,8 @@ export default function DanielShieldsGame({
   const [canTap, setCanTap] = useState(false);
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const roundRef = useRef(0);   // Mirror round to avoid stale closures
+  const livesRef = useRef(3);   // Mirror lives to avoid stale closures
   const shakeAnim = useRef(new Animated.Value(0)).current;
   const lionAnim = useRef(new Animated.Value(0)).current;
   const danielAnim = useRef(new Animated.Value(1)).current;
@@ -64,7 +65,9 @@ export default function DanielShieldsGame({
   }, [clearTimer, playPerfect]);
 
   const nextRound = useCallback(() => {
-    if (round >= TOTAL_ROUNDS || lives <= 0) {
+    const currentRound = roundRef.current;
+    const currentLives = livesRef.current;
+    if (currentRound >= TOTAL_ROUNDS || currentLives <= 0) {
       finish();
       return;
     }
@@ -84,7 +87,8 @@ export default function DanielShieldsGame({
       // Time's up!
       setCanTap(false);
       setShowResult('timeout');
-      setLives(l => l - 1);
+      livesRef.current -= 1;
+      setLives(livesRef.current);
       setStreak(0);
       playFail();
 
@@ -96,20 +100,29 @@ export default function DanielShieldsGame({
 
       setTimeout(() => {
         lionAnim.setValue(0);
-        setRound(r => r + 1);
-        if (lives - 1 > 0 && round + 1 < TOTAL_ROUNDS) {
+        roundRef.current += 1;
+        setRound(roundRef.current);
+        if (livesRef.current > 0 && roundRef.current < TOTAL_ROUNDS) {
           nextRound();
         } else {
           finish();
         }
       }, 800);
     }, reactionTime);
-  }, [round, lives, reactionTime, lionAnim, shakeAnim, playFail, finish]);
+  }, [reactionTime, lionAnim, shakeAnim, playFail, finish]);
 
   const start = () => {
     setStartedAt(Date.now());
     setStep('play');
     playTap();
+    roundRef.current = 0;
+    livesRef.current = 3;
+    setRound(0);
+    setLives(3);
+    setScore(0);
+    setStreak(0);
+    setBestStreak(0);
+    setReactionTime(INITIAL_TIME);
     setTimeout(() => nextRound(), 500);
   };
 
@@ -152,7 +165,8 @@ export default function DanielShieldsGame({
       setReactionTime(t => Math.max(MIN_TIME, t - 80));
     } else {
       // Wrong direction!
-      setLives(l => l - 1);
+      livesRef.current -= 1;
+      setLives(livesRef.current);
       setStreak(0);
       setShowResult('wrong');
       playFail();
@@ -166,9 +180,10 @@ export default function DanielShieldsGame({
 
     setTimeout(() => {
       lionAnim.setValue(0);
-      setRound(r => r + 1);
+      roundRef.current += 1;
+      setRound(roundRef.current);
       
-      if (lives <= (showResult === 'wrong' ? 1 : 0) || round + 1 >= TOTAL_ROUNDS) {
+      if (livesRef.current <= 0 || roundRef.current >= TOTAL_ROUNDS) {
         finish();
       } else {
         nextRound();
@@ -252,11 +267,13 @@ export default function DanielShieldsGame({
 
   const dirEmoji: Record<Direction, string> = { up: '⬆️', down: '⬇️', left: '⬅️', right: '➡️' };
 
+  const arenaLayoutRef = useRef({ width: 300, height: 200 });
+
   const handleTouch = (e: any) => {
     if (!canTap) return;
     const { locationX, locationY } = e.nativeEvent;
-    const centerX = 150; // Approximate center
-    const centerY = 100;
+    const centerX = arenaLayoutRef.current.width / 2;
+    const centerY = arenaLayoutRef.current.height / 2;
     const dx = locationX - centerX;
     const dy = locationY - centerY;
     
@@ -299,6 +316,9 @@ export default function DanielShieldsGame({
         <Pressable onPress={handleTouch}>
           <LinearGradient colors={['#2C1810', '#4A3728'] as const} style={{ 
             borderRadius: 20, padding: 16, alignItems: 'center', minHeight: 200,
+          }}
+          onLayout={(e) => {
+            arenaLayoutRef.current = { width: e.nativeEvent.layout.width, height: e.nativeEvent.layout.height };
           }}>
           {/* Lions from each direction */}
           <View style={{ position: 'absolute', top: 10, left: '50%', marginLeft: -20 }}>
