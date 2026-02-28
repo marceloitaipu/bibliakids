@@ -16,9 +16,9 @@ module.exports = {
   ],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],
   collectCoverageFrom: [
-    'src/utils/**/*.{ts,tsx}',
-    'src/state/**/*.{ts,tsx}',
+    'src/**/*.{ts,tsx}',
     '!src/**/*.d.ts',
+    '!src/**/__tests__/**',
   ],
   testMatch: ['**/__tests__/**/*.(spec|test).[jt]s?(x)'],
   moduleNameMapper: {

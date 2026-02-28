@@ -31,6 +31,7 @@ jest.mock('expo-speech', () => ({
   speak: jest.fn(),
   stop: jest.fn(),
   isSpeakingAsync: jest.fn().mockResolvedValue(false),
+  getAvailableVoicesAsync: jest.fn().mockResolvedValue([]),
 }));
 
 // Mock expo-linear-gradient
@@ -62,26 +63,34 @@ jest.mock('react-native', () => ({
   Alert: {
     alert: jest.fn(),
   },
+  Vibration: {
+    vibrate: jest.fn(),
+    cancel: jest.fn(),
+  },
   Animated: {
     View: 'Animated.View',
     Text: 'Animated.Text',
     Value: jest.fn(() => ({
       interpolate: jest.fn(),
+      setValue: jest.fn(),
     })),
+    add: jest.fn(() => ({ interpolate: jest.fn() })),
+    multiply: jest.fn(() => ({ interpolate: jest.fn() })),
     timing: jest.fn(() => ({
-      start: jest.fn(),
+      start: jest.fn((cb) => cb && cb()),
     })),
     spring: jest.fn(() => ({
-      start: jest.fn(),
+      start: jest.fn((cb) => cb && cb()),
     })),
     sequence: jest.fn(() => ({
-      start: jest.fn(),
+      start: jest.fn((cb) => cb && cb()),
     })),
     parallel: jest.fn(() => ({
-      start: jest.fn(),
+      start: jest.fn((cb) => cb && cb()),
     })),
     loop: jest.fn(() => ({
       start: jest.fn(),
+      stop: jest.fn(),
     })),
   },
   StyleSheet: {
@@ -96,4 +105,22 @@ jest.mock('react-native', () => ({
   },
   ActivityIndicator: 'ActivityIndicator',
   Switch: 'Switch',
+}));
+
+// Mock @react-navigation
+jest.mock('@react-navigation/native', () => ({
+  useNavigation: jest.fn(() => ({
+    navigate: jest.fn(),
+    goBack: jest.fn(),
+    reset: jest.fn(),
+  })),
+  useRoute: jest.fn(() => ({ params: {} })),
+  NavigationContainer: 'NavigationContainer',
+}));
+
+jest.mock('@react-navigation/native-stack', () => ({
+  createNativeStackNavigator: jest.fn(() => ({
+    Navigator: 'Navigator',
+    Screen: 'Screen',
+  })),
 }));
